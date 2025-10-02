@@ -4,7 +4,8 @@
 
 ---
 
-💡 Why DevOps?
+## 💡 Why DevOps?
+
 DevOps is the backbone of modern software delivery. Mastering DevOps means mastering automation, collaboration, and reliability. This repo helps you:
 
 Practice with real scenarios
@@ -38,4 +39,4 @@ Build confidence for interviews and projects
 ## 📜 License
 - This repository is for educational purposes.
 
-🌟 Happy Learning & Building!
+## 🌟 Happy Learning & Building!
