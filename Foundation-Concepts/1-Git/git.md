@@ -168,9 +168,8 @@ git log --stat
 git log --grep="fix bug"
 ```
 
----
 
-## Summary of Git Commands Used
+### Summary of Git Commands Used
 
 - **git init**: Initializes a new Git repository.
 - **git clone**: Copies a remote repository to your local machine.
@@ -189,8 +188,7 @@ git log --grep="fix bug"
 - **origin**: The default name for the remote repository from which the local repository was cloned.
 
 
-
-
+---
 
 ## Advanced Git Concepts
 
