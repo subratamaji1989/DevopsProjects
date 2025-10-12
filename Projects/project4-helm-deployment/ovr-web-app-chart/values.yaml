@@ -1,0 +1,37 @@
+# Default values for ovr-web-app-chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 2
+
+image:
+  repository: ovr-web-app-image
+  pullPolicy: IfNotPresent
+  # Overridden by the build script's -Tag parameter
+  tag: "v1.0"
+
+service:
+  type: NodePort
+  port: 8080
+  targetPort: 8080
+  # The fixed external port on the node
+  nodePort: 30080
+
+# Probes for checking application health
+probes:
+  liveness:
+    path: /
+    initialDelaySeconds: 30
+    periodSeconds: 20
+  readiness:
+    path: /
+    initialDelaySeconds: 10
+    periodSeconds: 10
+
+# We are not using Ingress in this example
+ingress:
+  enabled: false
+
+# Overrides for resource names
+nameOverride: ""
+fullnameOverride: ""
