@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta tags for character set and viewport -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVR Devotional Store</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <!-- Use system fonts for speed -->
+    <style>
+        :root {
+            --font-serif: 'Merriweather', serif;
+            --font-sans: 'Inter', 'Roboto', Arial, sans-serif;
+            --primary-gold: #e3b800;
+            --accent-gold: #c59d5f;
+            --dark-blue: #233a5e;
+            --text-primary: #333;
+            --text-secondary: #6c757d;
+            --bg-light: #fdfcfa;
+            --bg-gradient: linear-gradient(120deg, #fffbe6 0%, #f0f2ff 100%);
+            --white: #fff;
+            --border-light: #e3e6ff;
+            --shadow-light: rgba(80, 80, 255, 0.08);
+            --shadow-medium: rgba(80, 80, 255, 0.12);
+        }
+
+        body {
+            /* Enhanced background and font stack */
+            font-family: var(--font-sans);
+            background: var(--bg-light);
+            margin: 0;
+            min-height: 100vh;
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--white);
+            box-shadow: 0 2px 16px var(--shadow-light);
+            border-bottom: 1px solid var(--border-light);
+            padding: 0 32px;
+            height: 72px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+        .logo-container img {
+            height: 50px;
+            width: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0 2px 12px var(--shadow-medium);
+            border: 3px solid var(--primary-gold);
+            background: var(--white);
+            margin-top: 4px; /* Align with text */
+        }
+        .logo-container .brand-name {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--dark-blue);
+            letter-spacing: 1px;
+            font-family: var(--font-serif);
+        }
+        .top-search input {
+            width: 480px;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 24px 0 0 24px;
+            font-size: 1.05rem;
+            background: rgba(240,240,255,0.7);
+            box-shadow: 0 2px 8px rgba(80,80,255,0.04);
+            outline: none;
+            transition: box-shadow 0.2s;
+        }
+        .top-search {
+            display: flex;
+            align-items: center;
+            width: 550px;
+        }
+
+        .search-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            padding: 0 20px;
+        }
+        .top-search input:focus {
+            box-shadow: 0 4px 16px var(--shadow-medium);
+        }
+        .top-search button {
+            padding: 10px 22px;
+            border: none;
+            background: var(--dark-blue);
+            color: var(--white);
+            border-radius: 0 24px 24px 0;
+            cursor: pointer;
+            font-size: 1.05rem;
+            box-shadow: 0 2px 8px var(--shadow-light);
+            transition: background-color 0.2s;
+        }
+        .top-search button:hover {
+            background: var(--accent-gold);
+        }
+        .top-actions {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+        .top-actions a {
+        }
+        .top-actions .upload-btn {
+            background: var(--dark-blue);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px var(--shadow-light);
+            transition: background 0.2s, transform 0.2s;
+        }
+        .top-actions .upload-btn:hover {
+            background: var(--accent-gold);
+            transform: scale(1.08);
+        }
+        .top-actions .action-icon {
+            position: relative;
+            font-size: 1.7rem;
+            color: var(--dark-blue);
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .top-actions .notification:hover {
+            color: #ff2c2c;
+        }
+        .top-actions .notification-badge {
+            position: absolute;
+            top: -6px;
+            right: -8px;
+            background: var(--accent-gold);
+            color: var(--white);
+            border-radius: 50%;
+            font-size: 0.8rem;
+            padding: 2px 6px;
+            box-shadow: 0 2px 8px var(--shadow-medium);
+        }
+        .top-actions .action-icon.cart-icon {
+            color: var(--primary-gold);
+            position: relative; /* For popover positioning */
+        }
+        .cart-badge {
+            display: none; /* Hidden by default */
+            position: absolute; top: -6px; right: -8px; background: var(--accent-gold); color: var(--white);
+            border-radius: 50%; font-size: 0.8rem; padding: 2px 6px; box-shadow: 0 2px 8px var(--shadow-medium);
+        }
+        .top-actions .profile-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--dark-blue);
+            cursor: pointer;
+            box-shadow: 0 2px 8px var(--shadow-light);
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .header-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--dark-blue);
+            cursor: pointer;
+            box-shadow: 0 2px 8px var(--shadow-light);
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .top-actions .profile-avatar:hover {
+            box-shadow: 0 4px 16px var(--shadow-medium);
+            transform: scale(1.08);
+        }
+
+        /* Popover Styles */
+        .popover {
+            display: none;
+            position: absolute;
+            top: 60px;
+            right: 0;
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            width: 320px;
+            z-index: 1002;
+            border: 1px solid var(--border-light);
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            pointer-events: none;
+        }
+        .popover.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        .popover.show {
+            display: block;
+        }
+        .popover-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .popover-header img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .popover-user-info {
+            line-height: 1.4;
+        }
+        .popover-user-info .name {
+            font-weight: 600;
+            color: var(--dark-blue);
+        }
+        .popover-user-info .email {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        .popover-body {
+            padding: 8px 0;
+        }
+        .popover-body a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            text-decoration: none;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+        .popover-body a:hover {
+            background-color: var(--bg-light);
+        }
+        .popover-body a i {
+            width: 20px;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        .popover-footer {
+            padding: 12px 16px;
+            background: var(--bg-light);
+            border-top: 1px solid var(--border-light);
+        }
+        #cart-popover .popover-body {
+            padding: 16px;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        .cart-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+        .cart-item img {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+        .cart-item-details {
+            flex-grow: 1;
+            font-size: 0.95rem;
+        }
+        .cart-item-details .name {
+            font-weight: 600;
+            color: var(--dark-blue);
+        }
+        .cart-item-details .price {
+            color: var(--text-secondary);
+        }
+        .cart-subtotal {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--dark-blue);
+            text-align: right;
+        }
+        .name-tooltip {
+            position: absolute;
+            top: 110%;
+            right: 50%;
+            transform: translateX(50%) translateY(5px);
+            background: var(--dark-blue);
+            color: var(--white);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            pointer-events: none;
+        }
+        #profile-icon-container:hover .name-tooltip {
+            opacity: 1;
+            transform: translateY(0);
+            transition-delay: 0.5s;
+        }
+        .sidebar {
+            width: 308px;
+            background: var(--bg-light);
+            box-shadow: 0 0 32px var(--shadow-light);
+            padding: 0;
+            min-height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 72px;
+            z-index: 99;
+            border-right: none;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .sidebar-section {
+            margin-bottom: 0;
+            width: 100%;
+        }
+        .sidebar-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin: 18px 0 8px 32px;
+            letter-spacing: 1px;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+        }
+        .sidebar li {
+            padding: 0;
+            margin: 0;
+            width: 100%;
+        }
+        .sidebar a {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 1.15rem;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border-radius: 12px;
+            width: 90%;
+            margin: 0 auto;
+            padding: 14px 18px;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+            font-weight: 500;
+        }
+        .sidebar a:hover, .sidebar a.active {
+            background: var(--accent-gold);
+            color: var(--white);
+            box-shadow: 0 2px 12px var(--shadow-medium);
+        }
+        .sidebar i {
+            font-size: 1.35rem;
+            min-width: 32px;
+            text-align: center;
+        }
+        .sidebar a[title]:hover:after {
+            content: attr(title);
+            position: absolute;
+            left: 110%;
+            background: var(--dark-blue);
+            color: var(--white);
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            white-space: nowrap;
+            z-index: 10;
+            box-shadow: 0 2px 8px var(--shadow-medium);
+        }
+        .main {
+            padding: 48px 48px 0 48px;
+            background: none;
+        }
+        .content {
+            flex: 1;
+            padding: 0; /* Reset padding */
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        .category-nav {
+            width: 100%;
+            background: var(--bg-light);
+            border-bottom: 1px solid var(--border-light);
+            position: sticky;
+            top: 72px;
+            z-index: 99;
+        }
+        .category-nav ul {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 32px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        .category-nav ul li {
+            position: relative;
+        }
+        .category-nav ul li a {
+            color: var(--text-secondary);
+            font-size: 1.08rem;
+            font-weight: 600;
+            text-decoration: none;
+            padding: 18px 0;
+            display: block;
+            transition: color 0.2s, border-color 0.2s;
+            border-bottom: 3px solid transparent;
+        }
+        .category-nav ul li a.active {
+            color: var(--primary-gold);
+            border-bottom-color: var(--primary-gold);
+            font-weight: 700;
+        }
+        .category-nav ul li a:hover {
+            color: var(--primary-gold);
+            border-bottom-color: var(--primary-gold);
+        }
+        .has-mega:hover .mega-menu, .has-mega:focus-within .mega-menu {
+            display: flex;
+        }
+        .mega-menu {
+            display: none;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 100%;
+            background: var(--white);
+            box-shadow: 0 4px 32px var(--shadow-light);
+            border-radius: 0 0 18px 18px;
+            padding: 24px 32px;
+            min-width: 600px;
+            gap: 48px;
+            z-index: 100;
+            flex-direction: row;
+        }
+        .mega-menu > div {
+            min-width: 180px;
+            padding: 0 18px;
+        }
+        .mega-menu h4 {
+            color: var(--primary-gold);
+            font-size: 1.08rem;
+            margin-bottom: 12px;
+        }
+        .mega-menu a {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 8px;
+            transition: color 0.2s;
+        }
+        .mega-menu a:hover {
+            color: var(--primary-gold);
+        }
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 36px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        .video-card {
+            background: var(--white);
+            border-radius: 24px;
+            box-shadow: 0 4px 24px var(--shadow-light);
+            overflow: hidden;
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
+            position: relative;
+            border: 1px solid var(--border-light);
+        }
+        .video-card:hover {
+            box-shadow: 0 8px 32px var(--shadow-medium);
+            transform: translateY(-5px);
+        }
+        .video-thumb {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            background: var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .video-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 0;
+            transition: transform 0.3s ease;
+        }
+        .video-card:hover .video-thumb img {
+            transform: scale(1.05);
+        }
+        .price-tag {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: var(--primary-gold);
+            color: var(--dark-blue);
+            font-size: 1rem;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 10px;
+            z-index: 2;
+            box-shadow: 0 2px 8px var(--shadow-medium);
+        }
+        .play-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(4px);
+            color: var(--dark-blue);
+            border-radius: 50%;
+            width: 56px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            z-index: 2;
+            box-shadow: 0 2px 12px var(--shadow-medium);
+            transform-origin: center;
+        }
+        .video-thumb:hover .play-btn {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+        .video-info {
+            padding: 22px 28px 22px 28px;
+        }
+        .video-title {
+            font-size: 1.25rem;
+            font-family: var(--font-serif);
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--dark-blue);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            letter-spacing: 0.5px;
+        }
+        .video-meta {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            line-height: 1.5;
+        }
+        .video-actions {
+            padding-top: 16px;
+            margin-top: 16px;
+            border-top: 1px solid var(--border-light);
+            text-align: center;
+        }
+        .add-to-cart-btn {
+            background-color: var(--dark-blue);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .add-to-cart-btn:hover {
+            background-color: var(--accent-gold);
+        }
+        .video-channel {
+            font-size: 1.05rem;
+            color: var(--accent-gold);
+            font-weight: 600;
+            margin-top: 8px;
+        }
+        .profile-modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0; top: 0; width: 100vw; height: 100vh;
+            background: rgba(35, 58, 94, 0.3);
+            backdrop-filter: blur(8px);
+            justify-content: center;
+            align-items: center;
+        }
+        .profile-modal-content {
+            background: rgba(255,255,255,0.95);
+            padding: 40px;
+            border-radius: 18px;
+            box-shadow: 0 8px 48px rgba(80,80,255,0.18);
+            text-align: center;
+        }
+        .profile-modal-content img {
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            border: 5px solid var(--primary-gold);
+            object-fit: cover;
+            box-shadow: 0 2px 16px rgba(106,124,255,0.18);
+        }
+        .close-profile-modal {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            font-size: 2rem;
+            color: var(--dark-blue);
+            cursor: pointer;
+            background: rgba(255,255,255,0.85);
+            border-radius: 50%;
+            padding: 4px 12px;
+            box-shadow: 0 2px 8px var(--shadow-medium);
+        }
+        .festive-banner {
+            width: 100vw;
+            height: 450px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            overflow: hidden;
+            background: var(--dark-blue);
+        }
+        .festive-banner img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+            opacity: 0.7;
+            filter: brightness(1.15);
+        }
+        .banner-content {
+            position: relative;
+            z-index: 2;
+            color: var(--white);
+            padding-left: 8vw;
+            max-width: 600px;
+        }
+        .banner-content h1 {
+            font-family: var(--font-serif);
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .banner-content p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            text-shadow: 0 1px 5px rgba(0,0,0,0.2);
+        }
+        /* Main Modal Style */
+        .modal {
+            display: none;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: 1001;
+            background: rgba(35, 58, 94, 0.3);
+            backdrop-filter: blur(8px);
+        }
+        .feature-highlights {
+            width: 100%;
+            background: var(--bg-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 48px;
+            padding: 18px 0;
+            font-size: 1.08rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            box-shadow: 0 -2px 8px var(--shadow-light);
+            margin-top: 48px;
+        }
+
+        /* Checkout Page Styles */
+        .checkout-page {
+            display: none; /* Hidden by default */
+            max-width: 1400px;
+            margin: 48px auto;
+            padding: 0 48px;
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .checkout-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 48px;
+            align-items: flex-start;
+        }
+        .checkout-items-list {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 4px 24px var(--shadow-light);
+            padding: 24px;
+        }
+        .checkout-item {
+            display: grid;
+            grid-template-columns: 100px 1fr auto auto;
+            gap: 24px;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .checkout-item:last-child {
+            border-bottom: none;
+        }
+        .checkout-item img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .checkout-item-info .name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--dark-blue);
+        }
+        .checkout-item-info .price {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .quantity-controls button {
+            background: var(--bg-light);
+            border: 1px solid var(--border-light);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--dark-blue);
+        }
+        .quantity-controls .quantity {
+            font-weight: 600;
+            font-size: 1.1rem;
+            min-width: 20px;
+            text-align: center;
+        }
+        .checkout-item .item-total {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--dark-blue);
+            min-width: 80px;
+            text-align: right;
+        }
+        .checkout-summary {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 4px 24px var(--shadow-light);
+            padding: 24px;
+            position: sticky;
+            top: 120px; /* topbar height + margin */
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            font-size: 1.1rem;
+        }
+        .summary-row.total {
+            font-weight: 700;
+            font-size: 1.3rem;
+            border-top: 2px solid var(--border-light);
+            margin-top: 8px;
+        }
+
+        /* Login Page Styles */
+        .login-page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: var(--bg-gradient);
+        }
+        .login-container {
+            background: var(--white);
+            padding: 48px;
+            border-radius: 16px;
+            box-shadow: 0 8px 48px var(--shadow-light);
+            text-align: center;
+            width: 100%;
+            max-width: 450px;
+        }
+        .login-container h1 {
+            font-family: var(--font-serif);
+            color: var(--dark-blue);
+            margin-bottom: 32px;
+        }
+        .login-container .input-group {
+            margin-bottom: 24px;
+            text-align: left;
+        }
+        .login-container label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        .login-container input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            font-size: 1.1rem;
+        }
+        .login-container .login-btn {
+            width: 100%;
+            padding: 14px;
+            font-size: 1.1rem;
+            margin-top: 16px;
+        }
+        #login-error {
+            color: #ff2c2c;
+            margin-top: 16px;
+            display: none;
+        }
+
+        /* My Orders & Settings Page Styles */
+        .account-page {
+            display: none;
+            max-width: 1200px;
+            margin: 48px auto;
+            padding: 0 48px;
+            animation: fadeIn 0.5s ease;
+        }
+        .order-card {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 4px 24px var(--shadow-light);
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+        .order-card-header {
+            background: var(--bg-light);
+            padding: 16px 24px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+        .order-card-header strong {
+            color: var(--dark-blue);
+        }
+        .order-card-body {
+            padding: 24px;
+        }
+        .settings-form {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 4px 24px var(--shadow-light);
+            padding: 32px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        .settings-form .input-group {
+            margin-bottom: 0;
+        }
+        .settings-form .form-span-2 {
+            grid-column: span 2;
+        }
+        @media (max-width: 900px) {
+            .main { flex-direction: column; }
+            .sidebar { width: 100%; box-shadow: none; padding: 16px 0; position:static; min-height:auto; border-right:none; top:0; }
+            .content { padding: 16px; max-width: 100%; }
+            .topbar { padding: 0 12px; height: 64px; }
+            .main { margin-left: 0; padding: 16px 8px 0 8px; }
+            .video-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; }
+            .checkout-grid { grid-template-columns: 1fr; }
+            .checkout-summary { position: static; margin-top: 24px; }
+            .order-card-header { grid-template-columns: 1fr; }
+
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation Bar with Logo (Initially Hidden) -->
+    <header class="topbar">
+        <div class="logo-container">
+            <img src="img/logo.png" alt="OVR Logo">
+            <span class="brand-name">OVR</span>
+        </div>
+        <div class="search-container top-search">
+            <input type="text" placeholder="Try Mala, Idol or Search by Product Code" id="searchInput">
+            <button><i class="fas fa-search"></i></button>
+        </div>
+        <div class="top-actions">
+            <div class="action-icon" id="profile-icon-container" style="position: relative;">
+                <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User Avatar" class="header-avatar" id="profile-icon">
+                <div class="name-tooltip">Radha Krishna Das</div>
+                <div id="profile-popover" class="popover">
+                    <div class="popover-header">
+                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User Avatar">
+                        <div class="popover-user-info">
+                            <div class="name">Radha Krishna Das</div>
+                            <div class="email">radhakrishna.das@example.com</div>
+                        </div>
+                    </div>
+                    <div class="popover-body">
+                        <a href="#" onclick="showMyOrdersPage()"><i class="fas fa-box"></i> My Orders</a>
+                        <a href="#" onclick="showSettingsPage()"><i class="fas fa-cog"></i> Settings</a>
+                    </div>
+                    <div class="popover-footer">
+                        <a href="#" id="logout-button"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+            <div class="action-icon cart-icon" id="cart-icon-container" style="position: relative;">
+                <i class="fas fa-shopping-cart" id="cart-icon" style="font-size: 1.8rem;"></i>
+                <span class="cart-badge" id="cart-badge">0</span>
+                <div id="cart-popover" class="popover" style="width: 360px;">
+                    <div class="popover-body">Your cart is empty.</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Category Menu -->
+    <nav class="category-nav" style="display: none;">
+        <ul>
+            <li class="dropdown"><a href="#" class="active" onclick="showCategory('all');return false;">All</a></li>
+            <li class="dropdown"><a href="#" onclick="showCategory('Signature Collection');return false;">Signature Collection</a></li>
+            <li class="dropdown"><a href="#" onclick="showCategory('Spiritual Essentials');return false;">Spiritual Essentials</a></li>
+            <li class="dropdown"><a href="#" onclick="showCategory('Festival Specials');return false;">Festival Specials</a></li>
+            <li class="dropdown"><a href="#" onclick="showCategory('Combo Offers');return false;">Combo Offers</a></li>
+            <li class="dropdown"><a href="#" onclick="showCategory('Home Decor');return false;">Home Decor</a></li>
+            <li class="dropdown"><a href="#" onclick="showCategory('Accessories');return false;">Accessories</a></li>
+            <li class="dropdown"><a href="#" onclick="showCategory('Books & Media');return false;">Books & Media</a></li>
+            <li class="dropdown"><a href="#" onclick="showCategory('Idols');return false;">Idols</a></li>
+        </ul>
+    </nav>
+
+    <!-- Festive Banner with Banner Image -->
+    <section class="festive-banner" style="display: none;">
+        <img src="img/krishna.jpg" alt="Festive Banner">
+        <div class="banner-content">
+            <h1>Divine Collections for a Blessed Life</h1>
+            <p>Discover handcrafted idols, spiritual essentials, and festive decor to enrich your devotional journey.</p>
+        </div>
+    </section>
+    <main class="main" id="main-content" style="display: none;">
+        <div class="content">
+            <div id="videoGrid" class="video-grid"></div>
+        </div>
+    </main>
+    <!-- Checkout Page Section -->
+    <section class="checkout-page" id="checkout-page">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h1 style="font-family: var(--font-serif); color: var(--dark-blue);">Your Shopping Cart</h1>
+            <button class="add-to-cart-btn" onclick="hideCheckoutPage()" style="background: var(--accent-gold);"><i class="fas fa-arrow-left"></i> Continue Shopping</button>
+        </div>
+        <div class="checkout-grid">
+            <div class="checkout-items-list" id="checkout-items-list">
+                <!-- Cart items will be rendered here by JavaScript -->
+            </div>
+            <div class="checkout-summary">
+                <h2 style="font-family: var(--font-serif); color: var(--dark-blue); margin-top: 0;">Order Summary</h2>
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span id="summary-subtotal">₹0.00</span>
+                </div>
+                <div class="summary-row">
+                    <span>Shipping</span>
+                    <span>FREE</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total</span>
+                    <span id="summary-total">₹0.00</span>
+                </div>
+                <button class="add-to-cart-btn" style="width: 100%; padding: 14px; font-size: 1.1rem; margin-top: 16px;">Proceed to Checkout</button>
+            </div>
+        </div>
+    </section>
+    <!-- My Orders Page -->
+    <section class="account-page" id="orders-page">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h1 style="font-family: var(--font-serif); color: var(--dark-blue);">My Orders</h1>
+            <button class="add-to-cart-btn" onclick="hideAccountPages()" style="background: var(--accent-gold);"><i class="fas fa-arrow-left"></i> Back to Store</button>
+        </div>
+        <div id="orders-list">
+            <!-- Orders will be rendered here -->
+        </div>
+    </section>
+
+    <!-- Settings Page -->
+    <section class="account-page" id="settings-page">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h1 style="font-family: var(--font-serif); color: var(--dark-blue);">Settings</h1>
+            <button class="add-to-cart-btn" onclick="hideAccountPages()" style="background: var(--accent-gold);"><i class="fas fa-arrow-left"></i> Back to Store</button>
+        </div>
+        <div class="settings-form">
+            <div class="input-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" value="Radha Krishna Das">
+            </div>
+            <div class="input-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" value="radhakrishna.das@example.com">
+            </div>
+            <div class="input-group form-span-2">
+                <label for="address">Shipping Address</label>
+                <input type="text" id="address" value="108 Bhakti Marg, Vrindavan">
+            </div>
+            <div class="input-group">
+                <label for="password">New Password</label>
+                <input type="password" id="password" placeholder="Enter new password">
+            </div>
+            <div class="input-group">
+                <label for="confirm-password">Confirm Password</label>
+                <input type="password" id="confirm-password" placeholder="Confirm new password">
+            </div>
+            <button class="add-to-cart-btn form-span-2" style="padding: 14px; font-size: 1.1rem; margin-top: 16px;">Save Changes</button>
+        </div>
+    </section>
+
+    <!-- Login Page -->
+    <div class="login-page" id="login-page">
+        <div class="login-container">
+            <h1>Welcome to OVR</h1>
+            <div class="input-group"><label for="login-username">Username</label><input type="text" id="login-username" value="radha"></div>
+            <div class="input-group"><label for="login-password">Password</label><input type="password" id="login-password" value="krishna"></div>
+            <div id="login-error">Invalid username or password. Please try again.</div>
+            <button class="add-to-cart-btn login-btn" onclick="handleLogin()">Login</button>
+        </div>
+    </div>
+    <!-- Modal for image/link -->
+    <div id="modal" class="modal" style="align-items:center;justify-content:center;">
+        <div id="modalContent" class="modal-content" style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;"></div>
+    </div>
+    <!-- Profile Modal -->
+    <div id="profileModal" class="profile-modal" style="display:none;align-items:center;justify-content:center;">
+        <div class="profile-modal-content">
+            <span class="close-profile-modal" onclick="closeProfileModal()">&times;</span>
+            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User" />
+            <div style="margin-top:18px;font-size:1.3rem;font-weight:700;color:var(--dark-blue);">Your Profile</div>
+            <div style="margin-top:8px;font-size:1rem;color:var(--text-secondary);">Welcome to OVR!</div>
+        </div>
+    </div>
+    <script>
+        // --- Authentication and Page View State ---
+        const mainViews = ['.topbar', '.category-nav', '.festive-banner', '#main-content', '.feature-highlights'];
+        const accountPages = ['#checkout-page', '#orders-page', '#settings-page'];
+
+        function setMainViewVisibility(visible) {
+            // Hide all account pages first
+            accountPages.forEach(p => document.querySelector(p).style.display = 'none');
+
+            document.querySelector('.festive-banner').style.display = visible ? 'flex' : 'none';
+            document.querySelector('.topbar').style.display = visible ? 'flex' : 'none';
+            document.querySelector('.category-nav').style.display = visible ? 'block' : 'none';
+            document.getElementById('main-content').style.display = visible ? 'block' : 'none';
+            document.querySelector('.feature-highlights').style.display = visible ? 'flex' : 'none';
+        }
+
+        function showLoginPage() {
+            setMainViewVisibility(false);
+            accountPages.forEach(p => document.querySelector(p).style.display = 'none');
+            document.getElementById('login-page').style.display = 'flex';
+        }
+
+        function handleLogin() {
+            // Mock login
+            if (document.getElementById('login-username').value === 'radha' && document.getElementById('login-password').value === 'krishna') {
+                document.getElementById('login-page').style.display = 'none';
+                document.getElementById('login-error').style.display = 'none';
+                setMainViewVisibility(true);
+            } else {
+                document.getElementById('login-error').style.display = 'block';
+            }
+        }
+
+        // Show products by category from top dropdown and highlight selected
+        function showCategory(category) {
+            // Remove active from all
+            document.querySelectorAll('.category-nav ul li a').forEach(a => a.classList.remove('active'));
+            // Add active to selected
+            const links = Array.from(document.querySelectorAll('.category-nav ul li a'));
+            const selected = links.find(a => a.textContent.trim().toLowerCase() === (category === 'all' ? 'all' : category.toLowerCase()));
+            if (selected) selected.classList.add('active');
+            renderProducts(category, document.getElementById('searchInput').value);
+        }
+        // Profile picture enlarge modal
+        function openProfileModal() {
+            document.getElementById('profileModal').style.display = 'flex';
+        }
+        function closeProfileModal() {
+            document.getElementById('profileModal').style.display = 'none';
+        }
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeProfileModal();
+        });
+
+        // Popover Logic
+        const profileIcon = document.getElementById('profile-icon');
+        const profilePopover = document.getElementById('profile-popover');
+        const cartIcon = document.getElementById('cart-icon');
+        const cartPopover = document.getElementById('cart-popover');
+
+        function togglePopover(popover) {
+            // Hide other popovers first
+            if (popover !== profilePopover) profilePopover.classList.remove('show');
+            if (popover !== cartPopover) cartPopover.classList.remove('show');
+            // Toggle current popover
+            popover.classList.toggle('show');
+        }
+
+        profileIcon.addEventListener('click', (e) => {
+            e.stopPropagation();
+            togglePopover(profilePopover);
+        });
+
+        cartIcon.addEventListener('click', (e) => {
+            e.stopPropagation();
+            togglePopover(cartPopover);
+        });
+
+        // Close popovers when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!profilePopover.contains(e.target) && !profileIcon.contains(e.target)) {
+                profilePopover.classList.remove('show');
+            }
+            if (!cartPopover.contains(e.target) && !cartIcon.contains(e.target)) {
+                cartPopover.classList.remove('show');
+            }
+        });
+
+        // Logout functionality
+        document.getElementById('logout-button').addEventListener('click', (e) => {
+            e.preventDefault();
+            showLoginPage();
+        });
+        // Video Data
+        // 20 devotional items and combos
+        const products = [
+            { id: 1, name: "OVR Signature Idol", category: "Signature Collection", img: "img/2znqx_512.avif", price: "₹1299", desc: "Limited edition Gopal Thakur idol, crafted for OVR devotees." },
+            { id: 2, name: "Tulsi Meditation Mala", category: "Spiritual Essentials", img: "img/37pjn_512.avif", price: "₹249", desc: "Premium Tulsi mala for deep meditation and spiritual growth." },
+            { id: 3, name: "Festive Puja Thali", category: "Festival Specials", img: "img/4fo6d_512.avif", price: "₹599", desc: "Decorated thali set for Diwali, Holi, and all sacred occasions." },
+            { id: 4, name: "Blessed Combo Pack", category: "Combo Offers", img: "img/4zc52_512.avif", price: "₹1499", desc: "Idol, mala, and puja essentials in one exclusive combo." },
+            { id: 5, name: "Sandalwood Divine Incense", category: "Spiritual Essentials", img: "img/6a5ma_512.avif", price: "₹129", desc: "Long-lasting sandalwood incense for pure devotion." },
+            { id: 6, name: "Gopal Wall Art", category: "Home Decor", img: "img/6vgec_512.avif", price: "₹499", desc: "Elegant wall hanging with Gopal Thakur motif for your home." },
+            { id: 7, name: "Bhakti Ritual Set", category: "Combo Offers", img: "img/cbzgh_512.avif", price: "₹999", desc: "Mala, incense, and devotional book for daily rituals." },
+            { id: 8, name: "Peacock Feather Bookmark", category: "Accessories", img: "img/cddln_512.avif", price: "₹79", desc: "Symbolic bookmark for spiritual reading and study." },
+            { id: 9, name: "Spiritual Wisdom Books", category: "Books & Media", img: "img/f7zvl_512.avif", price: "₹499", desc: "Curated set of books for inspiration and learning." },
+            { id: 10, name: "Temple Brass Bell", category: "Spiritual Essentials", img: "img/g86gy_512.avif", price: "₹299", desc: "Handcrafted bell for auspicious beginnings and aarti." },
+            { id: 11, name: "Divine Photo Frame", category: "Home Decor", img: "img/gg443_512.avif", price: "₹349", desc: "Frame with Gopal Thakur image for your sacred space." },
+            { id: 12, name: "Aarti Celebration Kit", category: "Festival Specials", img: "img/hfvrd_512.avif", price: "₹699", desc: "Aarti essentials: diya, bell, and incense for festivals." },
+            { id: 13, name: "Lotus Rangoli Stencil", category: "Festival Specials", img: "img/hi2cz_512.avif", price: "₹199", desc: "Create beautiful lotus rangoli for festive occasions." },
+            { id: 14, name: "Gratitude Prayer Diary", category: "Books & Media", img: "img/id9ml_512.avif", price: "₹249", desc: "Diary for recording prayers, gratitude, and blessings." },
+            { id: 15, name: "OVR Blessings Combo", category: "Signature Collection", img: "img/kuepy_512.avif", price: "₹1599", desc: "Exclusive combo: idol, mala, and incense for OVR devotees." },
+            { id: 16, name: "Comfort Puja Mat", category: "Accessories", img: "img/mvubr_512.avif", price: "₹299", desc: "Soft mat for comfortable and focused puja rituals." },
+            { id: 17, name: "Gopal Keychain", category: "Accessories", img: "img/oijdv_512.avif", price: "₹99", desc: "Carry divine blessings everywhere with this keychain." },
+            { id: 18, name: "Idol + Thali Combo", category: "Combo Offers", img: "img/olyvw_512.avif", price: "₹1199", desc: "Idol and puja thali for your altar, perfect for gifting." },
+            { id: 19, name: "Scented Meditation Candle", category: "Spiritual Essentials", img: "img/qvof5_512.avif", price: "₹199", desc: "Scented candle for peaceful meditation and prayer." },
+            { id: 20, name: "Festival Worship Pack", category: "Festival Specials", img: "img/qybq3_512.avif", price: "₹1699", desc: "All essentials for festive worship and celebration." },
+            { id: 21, name: "Divine Pendant", category: "Accessories", img: "img/sypir_512.avif", price: "₹349", desc: "Pendant with spiritual motifs for daily wear." },
+            { id: 22, name: "Sacred Bracelet", category: "Accessories", img: "img/twfsh_512.avif", price: "₹249", desc: "Bracelet for devotion, style, and blessings." },
+            { id: 23, name: "Mini Krishna Idol", category: "Idols", img: "img/v8poy_512.avif", price: "₹599", desc: "Miniature Krishna idol for your altar or gifting." },
+            { id: 24, name: "Mini Radha Idol", category: "Idols", img: "img/vptxq_512.avif", price: "₹599", desc: "Miniature Radha idol for your altar or gifting." },
+            { id: 25, name: "Festival Garland", category: "Festival Specials", img: "img/vy4b1_512.avif", price: "₹199", desc: "Colorful garland for festive decoration and puja." },
+            { id: 26, name: "Traditional Oil Lamp", category: "Spiritual Essentials", img: "img/wtiei_512.avif", price: "₹349", desc: "Brass oil lamp for traditional puja rituals." },
+            { id: 27, name: "Devotional Poster", category: "Home Decor", img: "img/xcr2h_512.avif", price: "₹249", desc: "Poster with devotional artwork for your home." },
+            { id: 28, name: "Blessed Prosperity Coin", category: "Accessories", img: "img/xgkyw_512.avif", price: "₹129", desc: "Coin blessed for prosperity, luck, and success." },
+            { id: 29, name: "Spiritual Key Holder", category: "Accessories", img: "img/ygteh_512.avif", price: "₹179", desc: "Key holder with spiritual design for your home." },
+            { id: 30, name: "Sacred Ritual Thread", category: "Spiritual Essentials", img: "img/zh8jx_512.avif", price: "₹79", desc: "Thread for rituals, blessings, and protection." },
+            { id: 31, name: "Complete Festival Puja Kit", category: "Festival Specials", img: "img/zz4bq_512.avif", price: "₹1799", desc: "Complete puja kit for all major festivals." }
+        ];
+        
+        // Render Videos
+        function renderProducts(filter = "all", search = "") {
+            const grid = document.getElementById('videoGrid');
+            grid.innerHTML = "";
+            let filtered = products.filter(p => (filter === "all" || p.category === filter) && (p.name.toLowerCase().includes(search.toLowerCase()) || p.desc.toLowerCase().includes(search.toLowerCase())));
+            if (filtered.length === 0) {
+                grid.innerHTML = '<div style="text-align:center;width:100%;font-size:1.2rem;color:#a67c52;">No items found. \n Hare Krisnha Hare Rama!</div>';
+                return;
+            }
+            filtered.forEach((p, i) => {
+                const card = document.createElement('div');
+                card.className = 'video-card';
+                card.innerHTML = `
+                    <div class="video-thumb" onclick="openProductModal(${p.id})">
+                        <img src="${p.img}" alt="${p.name}" loading="lazy">
+                        <span class="price-tag">${p.price}</span>
+                        <span class="play-btn"><i class="fas fa-search-plus"></i></span>
+                    </div>
+                    <div class="video-info">
+                        <div class="video-title">${p.name}</div>
+                        <div class="video-meta">${p.desc}</div>
+                        <div class="video-actions">
+                            <button class="add-to-cart-btn" onclick="event.stopPropagation(); addToCart(${p.id});">Add to Cart</button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Category chips active state
+        // Sidebar features
+        function showAllItems() {
+            document.querySelectorAll('.chip').forEach(tab => tab.classList.remove('active'));
+            renderProducts('all', document.getElementById('searchInput').value);
+        }
+        function showCombos() {
+            document.querySelectorAll('.chip').forEach(tab => tab.classList.remove('active'));
+            renderProducts('combos', document.getElementById('searchInput').value);
+        }
+        function showHistory() {
+            alert('Order history feature coming soon!');
+        }
+        function showPlaylists() {
+            alert('Saved bhajans feature coming soon!');
+        }
+        function showOrders() {
+            alert('Your orders feature coming soon!');
+        }
+        function showWishlist() {
+            alert('Wishlist feature coming soon!');
+        }
+        function showLikedItems() {
+            alert('Liked items feature coming soon!');
+        }
+        function showDownloads() {
+            alert('Downloads feature coming soon!');
+        }
+
+        // Search
+        document.getElementById('searchInput').addEventListener('input', function() {
+            renderProducts('all', this.value);
+        });
+
+        // Modal for image/link
+        // Modal for product image/details
+        function openProductModal(productId) {
+            const p = products.find(prod => prod.id === productId);
+            if (!p) return;
+            document.getElementById('modalContent').innerHTML = `
+                <span class='close-modal' onclick='closeModal()' style='position:absolute;top:24px;right:24px;font-size:2.2rem;color:var(--dark-blue);cursor:pointer;background:rgba(255,255,255,0.8);border-radius:50%;padding:4px 14px;box-shadow:0 2px 8px var(--shadow-medium);z-index:1002; line-height: 1;'>&times;</span>
+                <img src="${p.img}" alt="${p.name}" style="width:auto;max-width:80vw;height:auto;max-height:75vh;border-radius:18px;display:block;margin:0 auto;box-shadow:0 8px 48px var(--shadow-medium);" />
+                <div style="margin-top:24px;text-align:center;font-size:1.8rem;font-weight:700;color:var(--dark-blue);font-family:var(--font-serif);">${p.name}</div>
+                <div style="margin-top:12px;text-align:center;font-size:1.15rem;color:var(--text-secondary);max-width:600px;">${p.desc}</div>
+                <div style="margin-top:20px;text-align:center;font-size:1.5rem;font-weight:700;color:var(--dark-blue);background:var(--primary-gold);border-radius:12px;display:inline-block;padding:8px 32px;">${p.price}</div>
+                <button onclick="addToCart(${p.id})" style="margin-top:24px;background:var(--dark-blue);color:var(--white);font-size:1.1rem;font-weight:600;border:none;border-radius:8px;padding:14px 40px;cursor:pointer;box-shadow:0 2px 8px var(--shadow-medium);transition:background-color 0.2s;" onmouseover="this.style.backgroundColor='var(--accent-gold)'" onmouseout="this.style.backgroundColor='var(--dark-blue)'">Add to Cart</button>
+            `;
+            document.getElementById('modal').style.display = 'flex'; // Use flex to center
+        }
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        // ESC key closes modal
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+                closeProfileModal();
+                profilePopover.classList.remove('show');
+                cartPopover.classList.remove('show');
+            }
+        });
+        // Cart Logic remains the same
+        let cart = {};
+
+        function addToCart(productId) {
+            if (cart[productId]) {
+                cart[productId].quantity++;
+            } else {
+                const product = products.find(p => p.id === productId);
+                cart[productId] = { ...product, quantity: 1 };
+            }
+            updateCartPopover();
+            // Briefly show popover on add
+            cartPopover.classList.add('show');
+            setTimeout(() => cartPopover.classList.remove('show'), 2000);
+        }
+
+        function updateCartPopover() {
+            const cartBody = document.querySelector('#cart-popover .popover-body');
+            const cartBadge = document.getElementById('cart-badge');
+            const cartItemCount = Object.keys(cart).length;
+
+            if (cartItemCount === 0) {
+                cartBody.innerHTML = 'Your cart is empty.';
+                cartBadge.style.display = 'none';
+                return;
+            }
+
+            cartBadge.style.display = 'inline-block';
+            cartBadge.textContent = cartItemCount;
+
+            let subtotal = 0;
+            cartBody.innerHTML = ''; // Clear existing content
+
+            for (const productId in cart) {
+                const item = cart[productId];
+                const itemPrice = parseFloat(item.price.replace('₹', ''));
+                subtotal += itemPrice * item.quantity;
+
+                const itemElement = document.createElement('div');
+                itemElement.className = 'cart-item';
+                itemElement.innerHTML = `
+                    <img src="${item.img}" alt="${item.name}">
+                    <div class="cart-item-details">
+                        <div class="name">${item.name}</div>
+                        <div class="price">${item.quantity} x ${item.price}</div>
+                    </div>
+                `;
+                cartBody.appendChild(itemElement);
+            }
+            
+            cartBody.innerHTML += `
+                <div class="popover-footer">
+                    <div class="cart-subtotal">Subtotal: ₹${subtotal.toFixed(2)}</div>
+                    <a href="#" onclick="showCheckoutPage()" style="display:block; text-align:center; background:var(--primary-gold); color:var(--dark-blue); padding:10px; border-radius:8px; text-decoration:none; margin-top:12px; font-weight:600;">View Cart & Checkout</a>
+                </div>`;
+        }
+
+        // Initial render
+        renderProducts();
+    </script>
+    <!-- Feature Highlights (Bottom Section) -->
+    <script>
+        // Checkout Page Logic
+        function showCheckoutPage() {
+            setMainViewVisibility(false);
+            document.getElementById('checkout-page').style.display = 'block';
+            renderCheckoutCart();
+            profilePopover.classList.remove('show'); // Close popover
+            window.scrollTo(0, 0);
+        }
+
+        function hideCheckoutPage() {
+            // Revert to the main store view
+            setMainViewVisibility(true);
+        }
+
+        function updateCartQuantity(productId, change) {
+            if (cart[productId]) {
+                cart[productId].quantity += change;
+                if (cart[productId].quantity <= 0) {
+                    delete cart[productId];
+                }
+            }
+            updateCartPopover();
+            renderCheckoutCart();
+        }
+
+        function renderCheckoutCart() {
+            const listContainer = document.getElementById('checkout-items-list');
+            const subtotalEl = document.getElementById('summary-subtotal');
+            const totalEl = document.getElementById('summary-total');
+            const cartItemCount = Object.keys(cart).length;
+
+            if (cartItemCount === 0) {
+                listContainer.innerHTML = '<p style="text-align:center; color: var(--text-secondary);">Your cart is empty. Add some divine items to begin!</p>';
+                subtotalEl.textContent = '₹0.00';
+                totalEl.textContent = '₹0.00';
+                return;
+            }
+
+            listContainer.innerHTML = '';
+            let subtotal = 0;
+
+            for (const productId in cart) {
+                const item = cart[productId];
+                const itemPrice = parseFloat(item.price.replace('₹', ''));
+                const itemTotal = itemPrice * item.quantity;
+                subtotal += itemTotal;
+
+                const itemElement = document.createElement('div');
+                itemElement.className = 'checkout-item';
+                itemElement.innerHTML = `
+                    <img src="${item.img}" alt="${item.name}">
+                    <div class="checkout-item-info">
+                        <div class="name">${item.name}</div>
+                        <div class="price">${item.price}</div>
+                    </div>
+                    <div class="quantity-controls">
+                        <button onclick="updateCartQuantity(${item.id}, -1)">-</button>
+                        <span class="quantity">${item.quantity}</span>
+                        <button onclick="updateCartQuantity(${item.id}, 1)">+</button>
+                    </div>
+                    <div class="item-total">₹${itemTotal.toFixed(2)}</div>
+                `;
+                listContainer.appendChild(itemElement);
+            }
+
+            subtotalEl.textContent = `₹${subtotal.toFixed(2)}`;
+            totalEl.textContent = `₹${subtotal.toFixed(2)}`;
+        }
+
+        // My Orders & Settings Page Logic
+        const mockOrders = [
+            { id: 'ORD-2024-001', date: 'October 15, 2024', total: '₹1548.00', status: 'Delivered', items: [products[0], products[1]] },
+            { id: 'ORD-2024-002', date: 'October 21, 2024', total: '₹999.00', status: 'Shipped', items: [products[6]] }
+        ];
+
+        function hideAccountPages() {
+            accountPages.forEach(p => document.querySelector(p).style.display = 'none');
+            setMainViewVisibility(true);
+        }
+
+        function showMyOrdersPage() {
+            setMainViewVisibility(false);
+            accountPages.forEach(p => document.querySelector(p).style.display = 'none');
+            document.getElementById('orders-page').style.display = 'block';
+            profilePopover.classList.remove('show');
+
+            const ordersList = document.getElementById('orders-list');
+            ordersList.innerHTML = '';
+            mockOrders.forEach(order => {
+                const orderCard = document.createElement('div');
+                orderCard.className = 'order-card';
+                orderCard.innerHTML = `
+                    <div class="order-card-header">
+                        <div><strong>ORDER PLACED</strong><br>${order.date}</div>
+                        <div><strong>TOTAL</strong><br>${order.total}</div>
+                        <div><strong>ORDER #</strong><br>${order.id}</div>
+                    </div>
+                    <div class="order-card-body">
+                        <h3 style="color: var(--accent-gold); margin-top: 0;">Status: ${order.status}</h3>
+                        ${order.items.map(item => `
+                            <div class="checkout-item" style="grid-template-columns: 80px 1fr; padding: 8px 0;">
+                                <img src="${item.img}" alt="${item.name}">
+                                <div class="checkout-item-info">
+                                    <div class="name">${item.name}</div>
+                                </div>
+                            </div>`).join('')}
+                    </div>
+                `;
+                ordersList.appendChild(orderCard);
+            });
+            window.scrollTo(0, 0);
+        }
+
+        function showSettingsPage() {
+            setMainViewVisibility(false);
+            accountPages.forEach(p => document.querySelector(p).style.display = 'none');
+            document.getElementById('settings-page').style.display = 'block';
+            profilePopover.classList.remove('show');
+            window.scrollTo(0, 0);
+        }
+
+        // Initial Load - Show Login Page
+        showLoginPage();
+    </script>
+    <footer class="feature-highlights">
+        <span><i class="fas fa-undo"></i> 7 Days Easy Return</span>
+        <span><i class="fas fa-money-bill-wave"></i> Cash on Delivery</span>
+        <span><i class="fas fa-tags"></i> Lowest Prices</span>
+    </footer>
+</body>
+</html>
