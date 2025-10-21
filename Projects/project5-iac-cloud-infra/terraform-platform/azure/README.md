@@ -184,6 +184,52 @@ This allows you to have many different application pipelines in different reposi
 
 ---
 
+## 🚀 Implementation Guide: Azure Portal & Azure DevOps
+
+This section provides a step-by-step guide on how to set up the necessary components in the Azure Portal and configure Azure DevOps to use this Terraform platform.
+
+### 1. Azure Portal Setup (Prerequisites)
+
+Before configuring the pipeline, you must create and configure the following resources in the Azure Portal.
+
+1.  **Create Service Principals:**
+    -   Create three separate Azure AD Service Principals (SPs) for the different pipeline stages: `validate-sp`, `plan-sp`, and `apply-sp`.
+    -   Note down the `appId` and `password` (or certificate thumbprint) for each.
+
+2.  **Create Storage Account for Terraform State:**
+    -   Provision an Azure Storage Account (e.g., `tfstate<your-unique-name>`).
+    -   Inside the storage account, create a blob container (e.g., `tfstate`) to store the Terraform state files.
+    -   Enable versioning and soft delete on the blob container for disaster recovery.
+
+3.  **Assign RBAC Permissions:**
+    -   Following the principle of least privilege, assign the necessary RBAC roles to the Service Principals you created. Refer to the RBAC Permissions section for the exact roles and scopes required for each SP.
+
+### 2. Azure DevOps Setup (Pipeline Configuration)
+
+Once the Azure resources are in place, configure your Azure DevOps project.
+
+1.  **Set up Git Repositories:**
+    -   Ensure you have two repositories in your Azure DevOps Project:
+        -   `terraform-platform`: This repository, containing the reusable modules and pipeline templates.
+        -   `app-ovr-infra` (or similar): The "caller" repository that will define the specific infrastructure stack to be deployed.
+
+2.  **Create Service Connections:**
+    -   In your Azure DevOps `Project Settings`, navigate to `Pipelines -> Service connections`.
+    -   Create three "Azure Resource Manager" service connections, one for each Service Principal (`validate-connection`, `plan-connection`, `apply-connection`).
+    -   When creating the connections, use the **Workload Identity federation (automatic)** authentication method. This is the most secure, secret-less approach.
+
+3.  **Create the Pipeline:**
+    -   In the `app-ovr-infra` repository, create an `azure-pipelines.yml` file that references the template from the `terraform-platform` repository, as shown in the Usage section.
+    -   Configure the pipeline in Azure DevOps to use this YAML file (/azure/azure-pipelines.yml).
+
+4.  **Configure Branch Policies:**
+    -   In `Project Settings -> Repositories`, select the `app-ovr-infra` repository.
+    -   Apply branch policies to your main branch (`main` or `master`).
+    -   **Require a minimum number of reviewers** to enforce the approval gate mentioned in the workflow.
+    -   **Add a build validation policy** that automatically triggers the `VALIDATE` stage of your pipeline for every Pull Request. This ensures all code is scanned and validated before it can be merged.
+
+---
+
 ## 🔐 RBAC Permissions
 
 To run this Terraform platform securely, especially within a CI/CD pipeline, it's crucial to follow the principle of least privilege. The pipeline should use different Service Connections (backed by Service Principals) for different stages.

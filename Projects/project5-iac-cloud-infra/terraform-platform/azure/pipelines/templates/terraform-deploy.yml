@@ -14,20 +14,19 @@ parameters:
   type: string
   default: 'app-ovr-infra'
 
-variables:
-  # Set pipeline variables directly from the incoming parameters.
-  CLOUD: 'azure'
-  ENVIRONMENT: '${{ parameters.environment }}'
-  APP: '${{ parameters.appName }}'
-  # Pin the Terraform version for consistency across all stages
-  TF_VERSION: '1.6.6'
-
 stages:
 # ===================================================================================
 # ==                               VALIDATE STAGE                                  ==
 # ===================================================================================
 - stage: Validate
   displayName: 'Validate & Scan'
+  variables:
+    # Set pipeline variables directly from the incoming parameters.
+    CLOUD: 'azure'
+    ENVIRONMENT: '${{ parameters.environment }}'
+    APP: '${{ parameters.appName }}'
+    # Pin the Terraform version for consistency across all stages
+    TF_VERSION: '1.6.6'
   jobs:
   - job: RunValidation
     displayName: 'Terraform Validate & Security Scans'
@@ -50,6 +49,13 @@ stages:
 - stage: Plan
   displayName: 'Plan'
   dependsOn: Validate
+  variables:
+    # Set pipeline variables directly from the incoming parameters.
+    CLOUD: 'azure'
+    ENVIRONMENT: '${{ parameters.environment }}'
+    APP: '${{ parameters.appName }}'
+    # Pin the Terraform version for consistency across all stages
+    TF_VERSION: '1.6.6'
   condition: succeeded()
   jobs:
   - job: RunPlan
@@ -68,22 +74,27 @@ stages:
           Contents: 'backend.tf'
           TargetFolder: '$(COMPOSITION_PATH_ABS)'
 
-      - task: TerraformTaskV4@4
+      - task: AzureCLI@2
         displayName: 'Terraform Init'
         inputs:
-          provider: 'azurerm'
-          command: 'init'
+          azureSubscription: '${{ parameters.ado_service_connection }}'
+          scriptType: 'bash'
+          scriptLocation: 'inlineScript'
+          inlineScript: |
+            set -euo pipefail
+            terraform init
           workingDirectory: '$(COMPOSITION_PATH_ABS)'
 
-      - task: TerraformTaskV4@4
+      - task: AzureCLI@2
         displayName: 'Terraform Plan'
         inputs:
-          provider: 'azurerm'
-          command: 'plan'
+          azureSubscription: '${{ parameters.ado_service_connection }}'
+          scriptType: 'bash'
+          scriptLocation: 'inlineScript'
+          inlineScript: |
+            set -euo pipefail
+            terraform plan -var-file="$(TFVARS_FILE)" -out=tfplan
           workingDirectory: '$(COMPOSITION_PATH_ABS)'
-          commandOptions: '-var-file="$(TFVARS_FILE)" -out=tfplan'
-          environmentServiceNameAzureRM: '${{ parameters.ado_service_connection }}'
-
       - task: PublishPipelineArtifact@1
         displayName: 'Publish Terraform Plan'
         inputs:
@@ -97,6 +108,13 @@ stages:
 - stage: Apply
   displayName: 'Apply'
   dependsOn: Plan
+  variables:
+    # Set pipeline variables directly from the incoming parameters.
+    CLOUD: 'azure'
+    ENVIRONMENT: '${{ parameters.environment }}'
+    APP: '${{ parameters.appName }}'
+    # Pin the Terraform version for consistency across all stages
+    TF_VERSION: '1.6.6'
   # This condition ensures apply only runs on the main branch
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
   jobs:
@@ -122,11 +140,13 @@ stages:
             parameters:
               setupType: 'minimal' # Only install core tools needed for apply
 
-          - task: TerraformTaskV4@4
+          - task: AzureCLI@2
             displayName: 'Terraform Apply'
             inputs:
-              provider: 'azurerm'
-              command: 'apply'
+              azureSubscription: '${{ parameters.ado_service_connection }}'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                set -euo pipefail
+                terraform apply -input=false tfplan
               workingDirectory: '$(Pipeline.Workspace)/plan'
-              commandOptions: '-input=false tfplan'
-              environmentServiceNameAzureRM: '${{ parameters.ado_service_connection }}'

@@ -12,7 +12,7 @@ parameters:
 - name: ado_service_connection
   displayName: 'Azure DevOps Service Connection'
   type: string
-  default: 'Azure-Dev-Federated'
+  default: 'Azure-Devops-Federated'
 - name: appName
   displayName: 'Application Name'
   type: string
