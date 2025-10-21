@@ -1,0 +1,16 @@
+# Variables for the virtual network and subnets
+vnet:
+  name: "ovr-vnet"
+  address_space: ["10.20.0.0/16"]
+
+subnets:
+  aks_subnet:
+    name: "aks-subnet"
+    address_prefixes: ["10.20.1.0/24"]
+  app_subnet:
+    name: "app-subnet"
+    address_prefixes: ["10.20.2.0/24"]
+    nsg_key: "app_nsg" # Associate the 'app_nsg' from security.yaml with this subnet
+  app_gateway_subnet:
+    name: "app-gateway-subnet"
+    address_prefixes: ["10.20.3.0/24"]

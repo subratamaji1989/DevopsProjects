@@ -1,0 +1,6 @@
+api_management_services:
+  stage_apim:
+    name: "ovr-apim-service"
+    publisher_name: "OVR Corp"
+    publisher_email: "contact@ovr.com"
+    sku_name: "Developer_1" # Use 'Developer' tier for non-production

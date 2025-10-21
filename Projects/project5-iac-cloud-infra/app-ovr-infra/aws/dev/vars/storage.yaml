@@ -1,0 +1,10 @@
+# # Defines S3 buckets for the application.
+
+# # Bucket Definitions: A map of S3 buckets.
+# buckets:
+#   app_data_bucket:
+#     # Bucket names must be globally unique.
+#     name: "ovr-app-data-bucket-unique-12345" # <-- CHANGE TO A GLOBALLY UNIQUE NAME
+#     tags:
+#       Name: "ovr-app-data-bucket"
+#       Environment: "ovr"

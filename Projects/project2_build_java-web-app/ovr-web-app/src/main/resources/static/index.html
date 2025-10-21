@@ -907,6 +907,37 @@
         .settings-form .form-span-2 {
             grid-column: span 2;
         }
+        .settings-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 48px;
+            align-items: flex-start;
+        }
+        .settings-profile {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 4px 24px var(--shadow-light);
+            padding: 32px;
+            text-align: center;
+            position: sticky;
+            top: 120px;
+        }
+        .settings-profile img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid var(--primary-gold);
+            margin-bottom: 16px;
+        }
+        .settings-card {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 4px 24px var(--shadow-light);
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+
+
         @media (max-width: 900px) {
             .main { flex-direction: column; }
             .sidebar { width: 100%; box-shadow: none; padding: 16px 0; position:static; min-height:auto; border-right:none; top:0; }
@@ -917,6 +948,8 @@
             .checkout-grid { grid-template-columns: 1fr; }
             .checkout-summary { position: static; margin-top: 24px; }
             .order-card-header { grid-template-columns: 1fr; }
+            .settings-layout { grid-template-columns: 1fr; }
+            .settings-profile { position: static; }
 
         }
     </style>
@@ -934,11 +967,11 @@
         </div>
         <div class="top-actions">
             <div class="action-icon" id="profile-icon-container" style="position: relative;">
-                <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User Avatar" class="header-avatar" id="profile-icon">
-                <div class="name-tooltip">Radha Krishna Das</div>
+                <img src="https://randomuser.me/api/portraits/women/32.jpg" alt="User Avatar" class="header-avatar" id="profile-icon">
+                <!-- <div class="name-tooltip">Radha Krishna Das</div> -->
                 <div id="profile-popover" class="popover">
                     <div class="popover-header">
-                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User Avatar">
+                        <img src="https://randomuser.me/api/portraits/women/32.jpg" alt="User Avatar">
                         <div class="popover-user-info">
                             <div class="name">Radha Krishna Das</div>
                             <div class="email">radhakrishna.das@example.com</div>
@@ -1015,9 +1048,18 @@
                     <span>Total</span>
                     <span id="summary-total">₹0.00</span>
                 </div>
-                <button class="add-to-cart-btn" style="width: 100%; padding: 14px; font-size: 1.1rem; margin-top: 16px;">Proceed to Checkout</button>
+                <button class="add-to-cart-btn" onclick="placeOrder()" style="width: 100%; padding: 14px; font-size: 1.1rem; margin-top: 16px;">Place Order</button>
             </div>
         </div>
+    </section>
+    <!-- Order Confirmation Page -->
+    <section class="account-page" id="order-confirmation-page" style="text-align: center;">
+        <i class="fas fa-check-circle" style="font-size: 5rem; color: #28a745; margin-bottom: 24px;"></i>
+        <h1 style="font-family: var(--font-serif); color: var(--dark-blue);">Thank You! Your Order is Placed.</h1>
+        <p style="font-size: 1.2rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto 24px auto;">
+            We have received your order and will begin processing it shortly. You can view your order details in the "My Orders" section.
+        </p>
+        <button class="add-to-cart-btn" onclick="hideAccountPages()" style="background: var(--accent-gold);"><i class="fas fa-arrow-left"></i> Continue Shopping</button>
     </section>
     <!-- My Orders Page -->
     <section class="account-page" id="orders-page">
@@ -1036,28 +1078,40 @@
             <h1 style="font-family: var(--font-serif); color: var(--dark-blue);">Settings</h1>
             <button class="add-to-cart-btn" onclick="hideAccountPages()" style="background: var(--accent-gold);"><i class="fas fa-arrow-left"></i> Back to Store</button>
         </div>
-        <div class="settings-form">
-            <div class="input-group">
-                <label for="name">Full Name</label>
-                <input type="text" id="name" value="Radha Krishna Das">
+        <div class="settings-layout">
+            <div class="settings-profile">
+                <img src="https://randomuser.me/api/portraits/women/32.jpg" alt="User Avatar">
+                <h2 style="font-family: var(--font-serif); color: var(--dark-blue); margin-bottom: 4px;">Radha Krishna Das</h2>
+                <p style="color: var(--text-secondary); margin-top: 0;">radhakrishna.das@example.com</p>
+                <button class="add-to-cart-btn" style="width: 100%; background: var(--accent-gold); margin-top: 16px;">Change Picture</button>
             </div>
-            <div class="input-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" value="radhakrishna.das@example.com">
+            <div>
+                <div class="settings-card">
+                    <h2 style="font-family: var(--font-serif); color: var(--dark-blue); margin-top: 0;">Personal Information</h2>
+                    <div class="settings-form" style="padding: 0; box-shadow: none;">
+                        <div class="input-group">
+                            <label for="name">Full Name</label>
+                            <input type="text" id="name" value="Radha Krishna Das">
+                        </div>
+                        <div class="input-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" value="radhakrishna.das@example.com" disabled>
+                        </div>
+                        <div class="input-group form-span-2">
+                            <label for="address">Shipping Address</label>
+                            <input type="text" id="address" value="108 Bhakti Marg, Vrindavan">
+                        </div>
+                    </div>
+                </div>
+                <div class="settings-card">
+                    <h2 style="font-family: var(--font-serif); color: var(--dark-blue); margin-top: 0;">Security</h2>
+                    <div class="settings-form" style="padding: 0; box-shadow: none;">
+                        <div class="input-group"><label for="password">New Password</label><input type="password" id="password" placeholder="Enter new password"></div>
+                        <div class="input-group"><label for="confirm-password">Confirm Password</label><input type="password" id="confirm-password" placeholder="Confirm new password"></div>
+                    </div>
+                </div>
+                <button class="add-to-cart-btn" onclick="saveSettings()" style="width: 100%; padding: 14px; font-size: 1.1rem; margin-top: 0;">Save All Changes</button>
             </div>
-            <div class="input-group form-span-2">
-                <label for="address">Shipping Address</label>
-                <input type="text" id="address" value="108 Bhakti Marg, Vrindavan">
-            </div>
-            <div class="input-group">
-                <label for="password">New Password</label>
-                <input type="password" id="password" placeholder="Enter new password">
-            </div>
-            <div class="input-group">
-                <label for="confirm-password">Confirm Password</label>
-                <input type="password" id="confirm-password" placeholder="Confirm new password">
-            </div>
-            <button class="add-to-cart-btn form-span-2" style="padding: 14px; font-size: 1.1rem; margin-top: 16px;">Save Changes</button>
         </div>
     </section>
 
@@ -1087,7 +1141,7 @@
     <script>
         // --- Authentication and Page View State ---
         const mainViews = ['.topbar', '.category-nav', '.festive-banner', '#main-content', '.feature-highlights'];
-        const accountPages = ['#checkout-page', '#orders-page', '#settings-page'];
+        const accountPages = ['#checkout-page', '#orders-page', '#settings-page', '#order-confirmation-page'];
 
         function setMainViewVisibility(visible) {
             // Hide all account pages first
@@ -1175,11 +1229,20 @@
         // Logout functionality
         document.getElementById('logout-button').addEventListener('click', (e) => {
             e.preventDefault();
+            // Clear all application state
+            cart = {};
+            mockOrders.length = 2; // Reset mock orders to initial state
+            localStorage.removeItem('ovrDevotionalCart');
+            localStorage.removeItem('ovrDevotionalOrders');
+            updateCartPopover();
+            
+            // Return to login page
             showLoginPage();
         });
         // Video Data
         // 20 devotional items and combos
         const products = [
+
             { id: 1, name: "OVR Signature Idol", category: "Signature Collection", img: "img/2znqx_512.avif", price: "₹1299", desc: "Limited edition Gopal Thakur idol, crafted for OVR devotees." },
             { id: 2, name: "Tulsi Meditation Mala", category: "Spiritual Essentials", img: "img/37pjn_512.avif", price: "₹249", desc: "Premium Tulsi mala for deep meditation and spiritual growth." },
             { id: 3, name: "Festive Puja Thali", category: "Festival Specials", img: "img/4fo6d_512.avif", price: "₹599", desc: "Decorated thali set for Diwali, Holi, and all sacred occasions." },
@@ -1219,7 +1282,7 @@
             grid.innerHTML = "";
             let filtered = products.filter(p => (filter === "all" || p.category === filter) && (p.name.toLowerCase().includes(search.toLowerCase()) || p.desc.toLowerCase().includes(search.toLowerCase())));
             if (filtered.length === 0) {
-                grid.innerHTML = '<div style="text-align:center;width:100%;font-size:1.2rem;color:#a67c52;">No items found. \n Hare Krisnha Hare Rama!</div>';
+                grid.innerHTML = '<div style="grid-column: 1 / -1; text-align:center; padding: 4rem 1rem; font-size:1.2rem;color:var(--text-secondary);">No items match your search. <br> Hare Krishna!</div>';
                 return;
             }
             filtered.forEach((p, i) => {
@@ -1288,7 +1351,7 @@
                 <div style="margin-top:24px;text-align:center;font-size:1.8rem;font-weight:700;color:var(--dark-blue);font-family:var(--font-serif);">${p.name}</div>
                 <div style="margin-top:12px;text-align:center;font-size:1.15rem;color:var(--text-secondary);max-width:600px;">${p.desc}</div>
                 <div style="margin-top:20px;text-align:center;font-size:1.5rem;font-weight:700;color:var(--dark-blue);background:var(--primary-gold);border-radius:12px;display:inline-block;padding:8px 32px;">${p.price}</div>
-                <button onclick="addToCart(${p.id})" style="margin-top:24px;background:var(--dark-blue);color:var(--white);font-size:1.1rem;font-weight:600;border:none;border-radius:8px;padding:14px 40px;cursor:pointer;box-shadow:0 2px 8px var(--shadow-medium);transition:background-color 0.2s;" onmouseover="this.style.backgroundColor='var(--accent-gold)'" onmouseout="this.style.backgroundColor='var(--dark-blue)'">Add to Cart</button>
+                <button onclick="addToCart(${p.id}); closeModal();" style="margin-top:24px;background:var(--dark-blue);color:var(--white);font-size:1.1rem;font-weight:600;border:none;border-radius:8px;padding:14px 40px;cursor:pointer;box-shadow:0 2px 8px var(--shadow-medium);transition:background-color 0.2s;" onmouseover="this.style.backgroundColor='var(--accent-gold)'" onmouseout="this.style.backgroundColor='var(--dark-blue)'">Add to Cart</button>
             `;
             document.getElementById('modal').style.display = 'flex'; // Use flex to center
         }
@@ -1307,6 +1370,17 @@
         });
         // Cart Logic remains the same
         let cart = {};
+        let mockOrders = []; // Will be populated on load
+
+        function saveCartToStorage() {
+            localStorage.setItem('ovrDevotionalCart', JSON.stringify(cart));
+        }
+
+        function loadCartFromStorage() {
+            const savedCart = localStorage.getItem('ovrDevotionalCart');
+            cart = savedCart ? JSON.parse(savedCart) : {};
+            updateCartPopover();
+        }
 
         function addToCart(productId) {
             if (cart[productId]) {
@@ -1315,6 +1389,7 @@
                 const product = products.find(p => p.id === productId);
                 cart[productId] = { ...product, quantity: 1 };
             }
+            saveCartToStorage();
             updateCartPopover();
             // Briefly show popover on add
             cartPopover.classList.add('show');
@@ -1388,6 +1463,7 @@
                     delete cart[productId];
                 }
             }
+            saveCartToStorage();
             updateCartPopover();
             renderCheckoutCart();
         }
@@ -1436,11 +1512,39 @@
             totalEl.textContent = `₹${subtotal.toFixed(2)}`;
         }
 
+        function placeOrder() {
+            if (Object.keys(cart).length === 0) {
+                alert("Your cart is empty!");
+                return;
+            }
+            // 1. Hide all other views
+            setMainViewVisibility(false);
+            accountPages.forEach(p => document.querySelector(p).style.display = 'none');
+
+            // 2. Show the confirmation page
+            document.getElementById('order-confirmation-page').style.display = 'block';
+
+            // 3. Add the current cart to mock orders (for demonstration)
+            const newOrder = {
+                id: `ORD-2024-00${mockOrders.length + 1}`,
+                date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+                total: document.getElementById('summary-total').textContent,
+                status: 'Processing',
+                items: Object.values(cart)
+            };
+            mockOrders.unshift(newOrder); // Add to the beginning of the array
+
+            localStorage.setItem('ovrDevotionalOrders', JSON.stringify(mockOrders)); // Save orders
+            // 4. Clear the cart and update UI
+            cart = {};
+            updateCartPopover();
+            renderCheckoutCart(); // This will now show an empty cart if the user navigates back
+
+            // 5. Scroll to top
+            window.scrollTo(0, 0);
+        }
+
         // My Orders & Settings Page Logic
-        const mockOrders = [
-            { id: 'ORD-2024-001', date: 'October 15, 2024', total: '₹1548.00', status: 'Delivered', items: [products[0], products[1]] },
-            { id: 'ORD-2024-002', date: 'October 21, 2024', total: '₹999.00', status: 'Shipped', items: [products[6]] }
-        ];
 
         function hideAccountPages() {
             accountPages.forEach(p => document.querySelector(p).style.display = 'none');
@@ -1455,6 +1559,11 @@
 
             const ordersList = document.getElementById('orders-list');
             ordersList.innerHTML = '';
+            if (mockOrders.length === 0) {
+                ordersList.innerHTML = '<p style="text-align:center; color: var(--text-secondary);">You have not placed any orders yet.</p>';
+                return;
+            }
+
             mockOrders.forEach(order => {
                 const orderCard = document.createElement('div');
                 orderCard.className = 'order-card';
@@ -1488,8 +1597,23 @@
             window.scrollTo(0, 0);
         }
 
-        // Initial Load - Show Login Page
-        showLoginPage();
+        function saveSettings() {
+            // In a real app, you would send this data to a server.
+            // For now, we'll just show a confirmation.
+            alert("Your settings have been saved successfully!");
+        }
+
+        // --- Initial Application Load ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedOrders = localStorage.getItem('ovrDevotionalOrders');
+            mockOrders = savedOrders ? JSON.parse(savedOrders) : [
+                { id: 'ORD-2024-001', date: 'October 15, 2024', total: '₹1548.00', status: 'Delivered', items: [products[0], products[1]] },
+                { id: 'ORD-2024-002', date: 'October 21, 2024', total: '₹999.00', status: 'Shipped', items: [products[6]] }
+            ];
+            loadCartFromStorage();
+            renderProducts();
+            showLoginPage(); // Or check for a saved login state
+        });
     </script>
     <footer class="feature-highlights">
         <span><i class="fas fa-undo"></i> 7 Days Easy Return</span>

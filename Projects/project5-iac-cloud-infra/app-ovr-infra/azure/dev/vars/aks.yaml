@@ -1,0 +1,23 @@
+# Variables for the Azure Kubernetes Service (AKS) cluster
+cluster:
+  name: "dev-aks-cluster" # Using a single name for the cluster
+  kubernetes_version: "1.29.2" # Updated to a valid and supported version
+  default_node_pool:
+    vm_size: "standard_a2m_v2"
+    node_count: 1
+  subnet_keys: ["aks_subnet"]
+  # node_pools must be a map of objects, with unique keys for each pool.
+  node_pools:
+    ovr_pool: # This is the logical key for the node pool
+      name: "ovrnodepool" # Azure resource names have constraints (lowercase, no hyphens)
+      vm_size: "standard_a2m_v2"
+      node_count: 1
+      min_count: 1
+      max_count: 3
+      enable_auto_scaling: true
+
+# Tags to apply to all resources for tracking and cost management
+tags:
+  Environment: "dev"
+  ManagedBy: "Terraform"
+  Project: "Project1-IAC"

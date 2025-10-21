@@ -1,0 +1,32 @@
+# A map of Azure Virtual Machine configurations. The keys are logical names.
+vm:
+  app_server_1:
+    name: "ovr-vm-app-01" # The name of the VM resource
+    size: "Standard_B1s" # The size of the VM
+    admin_username: "azureuser" # The admin username for the VM
+    admin_password: "AzureUser12#"
+    subnet_key: "app_subnet" # The logical name of the subnet from network.yaml
+    # Azure VM Image details
+    image:
+      publisher: "Canonical"
+      offer: "0001-com-ubuntu-server-jammy"
+      sku: "22_04-lts-gen2"
+      version: "latest"
+    tags:
+      Name: "ovr-vm-app-01"
+      Role: "Application"
+
+  # app_server_2:
+  #   name: "ovr-vm-app-02" # The name of the VM resource
+  #   size: "Standard_B1s" # The size of the VM
+  #   admin_username: "azureuser" # The admin username for the VM
+  #   subnet_key: "app_subnet" # The logical name of the subnet from network.yaml
+  #   # Azure VM Image details
+  #   image:
+  #     publisher: "Canonical"
+  #     offer: "0001-com-ubuntu-server-jammy"
+  #     sku: "22_04-lts-gen2"
+  #     version: "latest"
+  #   tags:
+  #     Name: "ovr-vm-app-02"
+  #     Role: "Application"

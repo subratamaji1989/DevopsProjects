@@ -1,0 +1,9 @@
+# sql_servers:
+#   main_sql_server:
+#     name: "ovr-sqlserver"
+#     administrator_login: "sqladmin"
+#     administrator_login_password: "ThisShouldBeAStrongPasswordFromKeyVault!"
+#     databases:
+#       app_db:
+#         name: "appdb"
+#         sku_name: "S0"

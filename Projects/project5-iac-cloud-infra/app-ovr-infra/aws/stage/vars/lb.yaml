@@ -1,0 +1,41 @@
+# Defines the load balancer and its target groups.
+
+# In your app-ovr-infra/aws/dev/vars/lb.yaml
+load_balancer:
+  name: ovr-app-lb
+  security_groups:
+    - lb_sg # Logical name of the security group from security.yaml
+  subnet_keys:
+    - app_subnet
+    - db_subnet
+  tags:
+    Name: "ovr-app-lb"
+    Environment: "ovr"
+  listeners:
+    http_listener: # A logical name for this listener
+      port: 80
+      protocol: "HTTP"
+      # Define the target group and its instances directly under the listener
+      target_group:
+        name: "ovr-app-http-tg"
+        port: 8080 # The port the application runs on.
+        health_check:
+          path: "/"
+        # Define the instances that belong to this target group
+        instances:
+          app_server_1: # Logical name for the instance
+            instance_type: "t3.medium"
+            ami: "ami-0c55b159cbfafe1f0"
+    # Example of a second listener for a different service
+    # http_api_listener:
+    #   port: 8081
+    #   protocol: "HTTP"
+    #   target_group:
+    #     name: "ovr-api-http-tg"
+    #     port: 9090
+    #     health_check:
+    #       path: "/ping"
+    #     instances:
+    #       api_server_1:
+    #         instance_type: "t3.small"
+    #         ami: "ami-0c55b159cbfafe1f0"

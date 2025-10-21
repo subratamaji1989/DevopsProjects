@@ -1,0 +1,43 @@
+# # A map of EC2 instance configurations. The keys ('app_server_1', etc.) are logical names.
+# instances:
+#   # --- Existing VMs ---
+#   app_server_1:
+#     ami: "ami-0c55b159cbfafe1f0" # Mandatory: The Amazon Machine Image ID.
+#     instance_type: "t3.medium" # Mandatory: The EC2 instance type.
+#     subnet_key: "app_subnet" # Mandatory: The logical name of the subnet.
+#     security_group_keys: ["app_sg"] # Mandatory: The logical names of the security groups.
+#     target_group_key: "http_listener" # This key MUST match a key in lb.yaml's target_groups
+#     tags:
+#       Name: "ovr-app-server-01"
+#       Role: "Application"
+
+#   app_server_2:
+#     ami: "ami-0c55b159cbfafe1f0"
+#     instance_type: "t3.medium"
+#     subnet_key: "app_subnet"
+#     security_group_keys: ["app_sg"]
+#     tags:
+#       Name: "ovr-app-server-02"
+#       Role: "Application"
+
+#   # app_server_3:
+#   #   ami: "ami-0c55b159cbfafe1f0"
+#   #   instance_type: "t3.large"
+#   #   subnet_key: "app_subnet"
+#   #   security_group_keys: ["app_sg"]
+#   #   tags:
+#   #     Name: "ovr-app-server-03"
+#   #     Role: "Application"
+
+#   # # --- Add 3 new VMs here ---
+#   # app_server_4:
+#   #   ami: "ami-0c55b159cbfafe1f0"
+#   #   instance_type: "t3.medium"
+#   #   subnet_key: "app_subnet"
+#   #   security_group_keys: ["app_sg"]
+#   #   tags:
+#   #     Name: "ovr-app-server-04"
+#   #     Role: "Application"
+
+#   # You can continue adding app_server_5, app_server_6, etc.
+#   # with unique logical names.

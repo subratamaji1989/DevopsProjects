@@ -99,6 +99,7 @@ function Build-Image {
     Write-Host "Current Dir: $PWD"
     $image = "${AppName}:${Tag}"
     docker build --no-cache -t $image -f "$PSScriptRoot\Dockerfile" $JavaAppDir
+    if ($LASTEXITCODE -ne 0) {
         Write-Error "Docker image build failed."
         exit 1
     }

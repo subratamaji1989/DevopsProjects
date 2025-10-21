@@ -1,0 +1,10 @@
+storage_accounts:
+  ovr_storage:
+    name: "ovrappstorage" # Suffix will be added by the module
+    account_tier: "Standard"
+    account_replication_type: "LRS"
+
+  # dev_storage:
+  #   name: "devappstorage" # Suffix will be added by the module
+  #   account_tier: "Standard"
+  #   account_replication_type: "LRS"

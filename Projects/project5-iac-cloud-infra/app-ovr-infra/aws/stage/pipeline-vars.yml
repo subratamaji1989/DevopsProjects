@@ -1,0 +1,14 @@
+# This file centralizes all pipeline control and configuration variables.
+# The buildspec.yml reads this file to configure its execution environment.
+pipeline-parameters:
+  # -- Pipeline Stage Control --
+  PIPELINE_STAGE: "APPLY"       # "VALIDATE" | "PLAN" | "APPLY" | "POST_VALIDATE"
+
+  # -- Infrastructure Definition --
+  APP: "app-ovr-infra"
+  CLOUD: "aws"
+  ENVIRONMENT: "stage"
+
+
+  # -- Post-Deployment Configuration --
+  SNS_TOPIC_ARN: "arn:aws:sns:us-east-2:123456789012:terraform-notify" # Example ARN for notifications

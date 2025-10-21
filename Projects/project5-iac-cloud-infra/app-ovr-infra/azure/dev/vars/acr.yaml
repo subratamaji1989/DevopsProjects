@@ -1,0 +1,4 @@
+container_registries:
+  main_registry:
+    name: "ovrcontainerregistry"
+    sku: "Standard"

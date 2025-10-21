@@ -1,0 +1,217 @@
+version: 0.2
+
+env:
+  shell: /bin/bash
+  variables:
+    # Provide sensible defaults in case pipeline-vars.yml doesn't include them
+    TF_VERSION: "1.6.6"
+    TFLINT_VERSION: "v0.50.3"
+    TFSEC_VERSION: "v1.28.1"
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.9
+      nodejs: 16
+    commands:
+      - |
+        install_yq() {
+          echo "==> [INSTALL] Installing yq (if needed)..."
+          if command -v yq >/dev/null 2>&1; then
+            echo "--> yq already installed."
+            return
+          fi
+          local yq_version="v4.40.5"
+          wget -q "https://github.com/mikefarah/yq/releases/download/${yq_version}/yq_linux_amd64" -O .local/bin/yq
+          chmod +x .local/bin/yq
+        }
+
+        # --- Helper Functions for Tool Installation ---
+        install_terraform() {
+          echo "==> [INSTALL] Installing Terraform v${TF_VERSION} (if needed)..."
+          if command -v terraform >/dev/null 2>&1 && terraform version 2>/dev/null | grep -q "Terraform v${TF_VERSION}"; then
+            echo "--> Correct Terraform version already installed."
+            return
+          fi
+
+          echo "--> Downloading Terraform..."
+          wget -q "https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip" -O .local/terraform.zip
+          unzip -o .local/terraform.zip -d .local/bin
+          rm -f .local/terraform.zip
+        }
+
+        install_devsecops_tools() {
+          echo "==> [INSTALL] Installing DevSecOps tools (tflint, tfsec)..."
+          if ! command -v tflint >/dev/null 2>&1; then
+            echo "--> Installing tflint..."
+            curl -sSL "https://github.com/terraform-linters/tflint/releases/download/${TFLINT_VERSION}/tflint_linux_amd64" -o .local/bin/tflint
+            chmod +x .local/bin/tflint
+          fi
+          if ! command -v tfsec >/dev/null 2>&1; then
+            echo "--> Installing tfsec..."
+            curl -sL "https://github.com/aquasecurity/tfsec/releases/download/${TFSEC_VERSION}/tfsec-linux-amd64" -o .local/bin/tfsec
+            chmod +x .local/bin/tfsec
+          fi
+        }
+
+        # --- Main Install Logic ---
+        echo "==> [SETUP] Configuring environment..."
+        mkdir -p .local/bin
+        export PATH="$(pwd)/.local/bin:$PATH"
+        echo "PATH=${PATH}"
+
+        install_yq
+
+        echo "==> [INSTALL] Installing base dependencies..."
+        pip install --upgrade pip -q pyyaml awscli || true
+        npm config set prefix "$(pwd)/.local"
+        npm install -g ajv-cli
+
+        install_terraform
+        install_devsecops_tools
+
+        echo "==> [INSTALL] Verifying tool versions..."
+        terraform --version
+        tflint --version
+        tfsec --version
+
+  pre_build:
+    commands:
+      - |
+        echo "==> [PRE_BUILD] Re-sourcing environment for build phase..."
+        export PATH="$(pwd)/.local/bin:$PATH"
+
+        # Validate that required environment variables are passed from the CI/CD system
+        if [ -z "${APP}" ] || [ -z "${CLOUD}" ] || [ -z "${ENVIRONMENT}" ] || [ -z "${PIPELINE_STAGE}" ]; then
+          echo "FATAL: Build aborted. Required values are not passed."
+          echo "Please ensure the following environment variables are set in your CodeBuild project:"
+          echo "  - PIPELINE_STAGE (e.g., PLAN, APPLY, VALIDATE, DESTROY)"
+          echo "  - APP (e.g., app-ovr-infra)"
+          echo "  - CLOUD (e.g., aws)"
+          echo "  - ENVIRONMENT (e.g., dev)"
+          exit 1
+        fi
+        echo "--> Required environment variables (APP, CLOUD, ENVIRONMENT) are present."
+
+  build:
+    commands:
+      - |
+        echo "==> [BUILD] Starting build phase..."
+        export PATH="$(pwd)/.local/bin:$PATH"
+
+        PROJECT_ROOT="$(pwd)"
+
+        # Construct all paths using the environment variables
+        COMPOSITION_PATH="${PROJECT_ROOT}/${CLOUD}/infra-stack"
+        SCHEMAS_DIR_PATH="${PROJECT_ROOT}/${CLOUD}/schemas"
+        VARS_PATH="${PROJECT_ROOT}/../${APP}/${CLOUD}/${ENVIRONMENT}/vars"
+        BACKEND_CONFIG_PATH="${PROJECT_ROOT}/../${APP}/${CLOUD}/${ENVIRONMENT}/backend.tf"
+        TFVARS_FILE="${PROJECT_ROOT}/generated/all.tfvars.json"
+        TOOLS_PATH="${PROJECT_ROOT}/${CLOUD}/tools"
+
+        if [ ! -d "${COMPOSITION_PATH}" ]; then
+          echo "FATAL: The specified COMPOSITION_PATH does not exist or is not a directory: ${COMPOSITION_PATH}"
+          echo "       Please check the CLOUD and ENVIRONMENT variables."
+          exit 1
+        fi
+      - echo "--> Merging variable YAML files into ${TFVARS_FILE}..."
+      - mkdir -p "$(dirname "${TFVARS_FILE}")"
+      - python3 "${TOOLS_PATH}/yaml2tfvars.py" "${VARS_PATH}" "${TFVARS_FILE}"
+      - echo "--> Changing to composition directory ${COMPOSITION_PATH}"
+      - cd "${COMPOSITION_PATH}"
+      - echo "--> Initializing Terraform for validation/dry-run (no backend)..."
+      - terraform init -backend=false
+      - |
+        # This block contains the main pipeline stage logic
+        if [ "${PIPELINE_STAGE}" = "VALIDATE" ] || \
+           [ "${PIPELINE_STAGE}" = "PLAN" ] || \
+           [ "${PIPELINE_STAGE}" = "APPLY" ] || \
+           [ "${PIPELINE_STAGE:-ALL}" = "ALL" ]; then
+
+          echo "==> [BUILD] Executing VALIDATE stage..."
+          
+          validate_yaml_files() {
+            local vars_dir="$1"; local schemas_dir="$2"
+            echo "--> Validating YAML files in '${vars_dir}' against schemas in '${schemas_dir}'..."
+            if [ ! -d "${vars_dir}" ]; then
+              echo "--> WARNING: Variables directory '${vars_dir}' not found. Skipping schema validation."
+              return
+            fi
+            find "${vars_dir}" -type f \( -iname "*.yaml" -o -iname "*.yml" \) -print0 | while IFS= read -r -d '' yaml_file; do
+              filename="$(basename "${yaml_file}")"; schema_name="${filename%.*}.schema.json"; schema_file="${schemas_dir}/${schema_name}"
+              if [ -f "${schema_file}" ]; then
+                ajv validate -s "${schema_file}" -d "${yaml_file}" || {
+                  echo "ERROR: Schema validation failed for ${yaml_file}";
+                  return 1
+                }
+              else
+                echo "--> INFO: No schema found for '${filename}', skipping validation."
+              fi
+            done
+          }
+          
+          validate_yaml_files "${VARS_PATH}" "${SCHEMAS_DIR_PATH}"
+          
+          echo "--> Running Terraform validate and plan (precheck)..."
+          terraform validate
+          terraform plan -var-file="${TFVARS_FILE}" -out=precheck.tfplan
+          terraform show -json precheck.tfplan > precheck.plan.json
+          
+          echo "--> Running DevSecOps scanners (tflint, tfsec)..."
+          tflint --force
+          tfsec .
+        fi
+
+        if [ "${PIPELINE_STAGE}" = "PLAN" ] || \
+           [ "${PIPELINE_STAGE}" = "APPLY" ] || \
+           [ "${PIPELINE_STAGE:-ALL}" = "ALL" ]; then
+
+          echo "==> [BUILD] Executing PLAN stage..."
+          terraform init -backend-config="${BACKEND_CONFIG_PATH}" -reconfigure -input=false
+          terraform plan -var-file="${TFVARS_FILE}" -out=${PROJECT_ROOT}/tfplan
+          terraform show -json tfplan > plan.json
+        fi
+
+        if [ "${PIPELINE_STAGE}" = "APPLY" ] || \
+           [ "${PIPELINE_STAGE:-ALL}" = "ALL" ]; then
+
+          echo "==> [BUILD] Executing APPLY stage..."
+          terraform init -backend-config="${BACKEND_CONFIG_PATH}" -reconfigure -input=false
+          terraform apply -input=false "${PROJECT_ROOT}/tfplan"
+        fi
+
+        if [ "${PIPELINE_STAGE}" = "DESTROY" ]; then
+          echo "==> [BUILD] Executing DESTROY stage..."
+          terraform init -backend-config="${BACKEND_CONFIG_PATH}" -reconfigure -input=false
+          terraform destroy -var-file="${TFVARS_FILE}" -auto-approve
+        fi
+
+        if [ "${PIPELINE_STAGE}" = "APPLY" ] || \
+           [ "${PIPELINE_STAGE:-ALL}" = "ALL" ]; then
+
+          echo "==> [BUILD] Executing POST-VALIDATE stage..."
+          if [ -f "${TFVARS_FILE}" ]; then
+            INSTANCE_NAME="$(yq e '.tags.Name // ""' "${TFVARS_FILE}")"
+            if [ -n "${INSTANCE_NAME}" ]; then
+              echo "--> Checking EC2 instance state for Name=${INSTANCE_NAME}"
+              aws ec2 describe-instances --filters "Name=tag:Name,Values=${INSTANCE_NAME}" --query "Reservations[].Instances[].State.Name" || true
+            else
+              echo "--> INFO: Instance name not found in tfvars. Skipping EC2 checks."
+            fi
+          else
+            echo "--> INFO: TFVARS file ${TFVARS_FILE} not found. Skipping POST_VALIDATE checks."
+          fi
+        fi
+
+artifacts:
+  files:
+    - 'tfplan'
+    - 'plan.json'
+  base-directory: '${COMPOSITION_PATH}'
+  discard-paths: no
+
+cache:
+  paths:
+    - '.local/bin/**/*'
+    - '/root/.cache/pip/**/*'
+    - '/root/.npm/**/*'

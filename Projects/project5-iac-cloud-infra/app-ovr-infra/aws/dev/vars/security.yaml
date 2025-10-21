@@ -1,0 +1,32 @@
+# Defines security groups and their rules.
+security_groups:
+  # Security group for the public-facing Application Load Balancer
+  lb_sg:
+    name: "ovr-lb-sg" # Mandatory: The name of the security group.
+    description: "Allow HTTP/HTTPS traffic to the load balancer"
+    tags:
+      Name: "ovr-lb-sg"
+    rules:
+      - type: "ingress"
+        from_port: 80
+        to_port: 80
+        protocol: "tcp"
+        cidr_blocks: ["0.0.0.0/0"]
+      - type: "egress"
+        from_port: 0
+        to_port: 0
+        protocol: "-1"
+        cidr_blocks: ["0.0.0.0/0"]
+
+  # Security group for the application EC2 instances
+  app_sg:
+    name: "ovr-app-sg" # Mandatory: The name of the security group.
+    description: "Allow traffic from the load balancer to the application"
+    tags:
+      Name: "ovr-app-sg"
+    rules:
+      - type: "ingress"
+        from_port: 8080 # Application port
+        to_port: 8080
+        protocol: "tcp"
+        source_sg_key: "lb_sg" # IMPORTANT: Only allows traffic from the LB

@@ -1,0 +1,43 @@
+# Its primary purpose is to call the reusable template from the `terraform-platform` repo.
+
+parameters:
+- name: environment
+  displayName: 'Target Environment'
+  type: string
+  default: 'dev'
+- name: stack_name
+  displayName: 'Stack Name'
+  type: string
+  default: 'infra-stack'
+- name: ado_service_connection
+  displayName: 'Azure DevOps Service Connection'
+  type: string
+  default: 'Azure-Dev-Federated'
+- name: appName
+  displayName: 'Application Name'
+  type: string
+  default: 'app-ovr-infra'
+
+trigger:
+  branches:
+    include:
+    - main
+pr:
+- main
+
+resources:
+  repositories:
+  - repository: platform # An alias for the terraform-platform repository
+    type: github # or git, azuredevops, etc.
+    name: subratamaji1989/terraform-platform
+    ref: main # Or a specific release tag like 'refs/tags/v1.2.0'
+
+# You can define different parameters for different environments if needed,
+# but for simplicity, we'll use a single set here.
+stages:
+- template: pipelines/templates/terraform-deploy.yml@platform # This calls the template
+  parameters:
+    environment: ${{ parameters.environment }}
+    stack_name: ${{ parameters.stack_name }}
+    appName: ${{ parameters.appName }}
+    ado_service_connection: ${{ parameters.ado_service_connection }}

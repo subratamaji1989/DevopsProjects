@@ -4,7 +4,8 @@ This guide provides a complete playbook for developing, containerizing, and depl
 
 ## Table of Contents
 1. [Prerequisites](#prerequisites)
-2. [Create and Run the Java App in VS Code](#part-1-create-and-run-the-java-app-in-vs-code)
+2. [Part 1: Create and Run the Java App in VS Code](#part-1-create-and-run-the-java-app-in-vs-code)
+3. [Part 2: Build and Run from the Command Line](#part-2-build-and-run-from-the-command-line)
 
 ---
 
@@ -58,3 +59,28 @@ The Java extensions make it easy to run and debug your application directly with
 5.  Once started, you can access the health endpoint at `http://localhost:8080/actuator/health` in your browser.
 6.  To stop the application, click the red square on the floating debug toolbar or press `Ctrl+C` in the terminal.
 
+---
+
+## Part 2: Build and Run from the Command Line
+
+For automation or users who prefer the command line, you can build and run the application using Maven directly.
+
+### Step 1: Build the Application
+
+Navigate to the root directory of your project in your terminal and run the following Maven command to compile the code and package it into an executable JAR file.
+
+```bash
+mvn clean package -DskipTests
+```
+This command cleans the project, builds it, and skips running tests. The resulting JAR file will be located in the `target` directory.
+
+### Step 2: Run the Application
+
+Once the build is complete, you can run the application using the `java -jar` command.
+
+```bash
+mvn spring-boot:run
+# or
+java -jar target/java-web-app-0.0.1-SNAPSHOT.jar
+```
+*Note: The version number in the JAR file name (`0.0.1-SNAPSHOT`) may vary depending on what you specified during project creation.*

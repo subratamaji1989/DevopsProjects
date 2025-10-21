@@ -1,0 +1,29 @@
+# Variables for the Azure Application Gateway (L7)
+application_gateways:
+  ovr_app_gateway:
+    name: "ovr-app-gateway"
+    sku_name: "Standard_v2"
+    sku_tier: "Standard_v2"
+    sku_capacity: 2
+    subnet_key: "app_gateway_subnet" # Assumes a subnet with this key exists in network.yaml
+    listeners:
+      http_listener:
+        name: "app-http-listener"
+        protocol: "Http"
+        port: 80
+    backend_pools:
+      app_pool:
+        name: "app-backend-pool"
+    http_settings:
+      app_setting:
+        name: "app-http-settings"
+        protocol: "Http"
+        port: 8080
+        path: "/"
+    routing_rules:
+      default_rule:
+        name: "default-routing-rule"
+        priority: 100
+        listener_key: "http_listener"
+        backend_pool_key: "app_pool"
+        http_setting_key: "app_setting"

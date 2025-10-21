@@ -1,0 +1,10 @@
+# Defines Elastic Container Registry (ECR) repositories.
+
+repositories:
+  frontend_app:
+    name: "ovr-ecr"
+    image_tag_mutability: "MUTABLE" # Can be "IMMUTABLE" for stricter versioning
+    scan_on_push: true
+    tags:
+      Name: "ovr-frontend-app"
+      Environment: "ovr"
