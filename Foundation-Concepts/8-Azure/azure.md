@@ -362,6 +362,73 @@ az group delete --name myRG --yes --no-wait
 az role assignment list -o table
 ```
 
+
+----
+## 🔐 Securing APIs with APIM, App Registrations, and Managed Identity
+
+These four components are central to securing APIs in Azure, especially when using Azure API Management (APIM).
+
+| Component | Primary Role in API Security | Use Cases |
+|---|---|---|
+| 📱 **App Registration (Microsoft Entra ID)** | Represents an application that interacts with the Microsoft identity platform. It defines the application's identity, permissions (scopes/roles), and authentication details (secrets/certificates). | **External Clients/Users (Client-to-APIM):** Used to define the API itself (as a resource) and for client applications to get a token to call the API Gateway. <br> **Legacy/Non-Azure Backends:** Used to secure backends that require a service principal (with a client secret/certificate) for authentication. |
+| 🤖 **Managed Identity (MI)** | An automatically managed identity in Microsoft Entra ID for Azure resources. It eliminates the need for developers to manage credentials (secrets/certificates). | **Azure Resource-to-Azure Resource (APIM-to-Backend):** Used by APIM to authenticate to an Azure-hosted backend API (like Azure Functions, App Service) or other Azure services (like Key Vault) without managing secrets. |
+| 🛡️ **APIM (Azure API Management)** | Acts as an API Gateway to expose, manage, and secure APIs. It centralizes security policies, rate limiting, and caching. | **Policy Enforcement:** Uses the `validate-jwt` policy to secure the API frontend (client-to-APIM) by validating tokens issued via an App Registration. Uses the `authentication-managed-identity` policy to secure the API backend (APIM-to-backend) by having APIM acquire a token using its Managed Identity. |
+| 🎯 **Secure APIs (The Goal)** | The goal achieved by combining the above elements. Security typically involves authentication (verifying the caller's identity) and authorization (checking the caller's permissions). | **Client Authentication:** Using App Registration for clients to get tokens. <br> **API Authorization (Frontend):** APIM validates the client's token using the `validate-jwt` policy against the App Registration details. <br> **APIM to Backend Authentication:** APIM uses its Managed Identity to get a token for the backend API. |
+
+----
+
+#### Client-to-APIM (Frontend Security):
+1.  The API itself is defined via a backend **App Registration** in Microsoft Entra ID, which exposes API Scopes (permissions).
+2.  A client application obtains an OAuth 2.0 access token from Microsoft Entra ID, specifying the API's scopes.
+3.  **APIM** is configured with a `validate-jwt` policy. This policy checks the incoming request's `Authorization` header, validating the token against the backend App Registration's details (like audience and issuer).
+
+#### APIM-to-Backend (Backend Security):
+1.  The backend API (e.g., Azure Function) is also protected by Entra ID.
+2.  **APIM** is configured with a System-Assigned **Managed Identity**.
+3.  This Managed Identity is granted permission to call the backend API.
+4.  An APIM policy (`authentication-managed-identity`) is used to automatically acquire a token using the Managed Identity and inject it into the request, enabling secure, secret-less communication.
+
+
+
 ---
+<details>
+<summary style="background-color: #e0f7fa; padding: 10px; border-radius: 5px; cursor: pointer; border: 1px solid #b2ebf2;">▶️ <b>View: How They Work Together (Diagram & Explanation)</b></summary>
+
+```mermaid
+sequenceDiagram
+    participant Client as 📱 Client App
+    participant APIM as 🛡️ API Management
+    participant EntraID as 🆔 Microsoft Entra ID
+    participant Backend as ⚙️ Backend API
+
+    rect rgb(225, 245, 254)
+        note over Client, APIM: Frontend Security (Client → APIM)
+        Client->>EntraID: 1. Request Token for API
+        EntraID-->>Client: 2. Issue Client JWT Token
+        Client->>APIM: 3. Call API with Client Token
+    end
+
+    rect rgb(232, 245, 233)
+        note over APIM, Backend: Backend Security (APIM → Backend)
+        activate APIM
+        APIM->>APIM: 4. Validate Client Token (validate-jwt policy)
+        APIM->>EntraID: 5. Request Backend Token (using Managed Identity)
+        EntraID-->>APIM: 6. Issue Backend JWT Token
+        APIM->>Backend: 7. Call Backend with Backend Token
+        Backend-->>APIM: 8. Return Backend Response
+        deactivate APIM
+    end
+
+    APIM-->>Client: 9. Return Final Response
+
+```
+</details>
+
+
+
+The video below offers a tutorial on protecting an API in Azure API Management using OAuth.
+
+#### 🎓 Recommended Resource
+> * **[Protect an API in Azure API Management using OAuth - Step-by-Step Tutorial](https://www.youtube.com/watch?v=s724GgNUt1g)**: This video demonstrates using OAuth with Azure API Management, which relies on App Registrations and JWT validation for securing APIs.
 
 *End of cheat sheet — happy cloud building with Azure!*
