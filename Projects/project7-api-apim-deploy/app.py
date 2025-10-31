@@ -7,11 +7,6 @@ app = Flask(__name__)
 # Configure basic logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# This is the core logic for a simple HTTP endpoint running on Flask.
-# In this scenario, the security (token validation) is handled by the Azure App Service
-# platform (Authentication / Authorization) *before* this code executes, using the
-# App Registration settings from your guide.
-# The code itself does not need to validate the JWT.
 api_data = {
     "products": [
         {"id": 1, "name": "Laptop", "price": 1200},
