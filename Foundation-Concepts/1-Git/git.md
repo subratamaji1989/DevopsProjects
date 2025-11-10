@@ -1,5 +1,33 @@
 ## **Introduction to Version Control -- GIT**
 
+## Table of Contents
+- [What is Git?](#what-is-git)
+- [What is GitHub and GitLab?](#what-is-github-and-gitlab)
+- [1. Set Up the Environment](#1-set-up-the-environment)
+  - [Installing Git](#installing-git)
+  - [Setting Up GitHub and GitLab Accounts](#setting-up-github-and-gitlab-accounts)
+- [2. Clone and Configure Git](#2-clone-and-configure-git)
+- [3. Create a Feature Branch and Make Changes](#3-create-a-feature-branch-and-make-changes)
+- [4. Push Your Changes and Create a Pull Request (PR)](#4-push-your-changes-and-create-a-pull-request-pr)
+- [5. Resolve Merge Conflicts](#5-resolve-merge-conflicts)
+- [6. Review and Merge](#6-review-and-merge)
+- [7. Clean Up](#7-clean-up)
+- [8. Viewing Commit Logs](#8-viewing-commit-logs)
+- [Summary of Git Commands Used](#summary-of-git-commands-used)
+- [Advanced Git Concepts](#advanced-git-concepts)
+  - [1. Amending Commits](#1-amending-commits)
+  - [2. Rewriting History with Interactive Rebase](#2-rewriting-history-with-interactive-rebase)
+  - [3. Tagging Releases](#3-tagging-releases)
+  - [4. Syncing with Upstream](#4-syncing-with-upstream)
+  - [5. Stashing and Cherry-Picking](#5-stashing-and-cherry-picking)
+  - [6. Rebasing vs. Merging](#6-rebasing-vs-merging)
+  - [7. Undoing Changes](#7-undoing-changes)
+  - [8. Git Branching Strategies](#8-git-branching-strategies)
+- [Git Hooks](#git-hooks)
+- [Git Submodules](#git-submodules)
+- [Troubleshooting Common Git Issues](#troubleshooting-common-git-issues)
+- [Git Best Practices](#git-best-practices)
+
 ## **What is Git?**
 Git is a distributed version control system (DVCS) that allows multiple people to work on the same project while keeping track of changes. It enables teams to collaborate efficiently, track modifications, and revert to previous versions when needed.
 
@@ -10,8 +38,9 @@ Git is a distributed version control system (DVCS) that allows multiple people t
 - **GitLab** provides built-in DevOps features like CI/CD pipelines and project management tools.
 
 
-### **1. Set Up the Environment**
-## Installing Git
+### 1. Set Up the Environment
+
+#### Installing Git
 
 ### Windows
 1. Download Git from (https://git-scm.com/downloads/win).
@@ -249,9 +278,15 @@ Follow prompts to squash, reword, or drop commits
 **Visual Comparison:**
 
 ```
-title Tag Types
-"Lightweight (v1.0.0)" : 50
-"Annotated (v1.1.0)" : 50
+Lightweight Tag (v1.0.0)
+    |
+    v
+  Commit
+
+Annotated Tag (v1.1.0)
+    |
+    v
+  Commit (with metadata)
 ```
 
 **Steps:**
@@ -364,3 +399,87 @@ git revert xyz256
 *   **Gitflow:** A strict model designed for scheduled releases. It uses feature branches, release branches, and hotfix branches, in addition to the main and develop branches.
 *   **GitHub Flow:** A simpler workflow where everything in the `main` branch is deployable. Feature branches are created off main and merged back in after review.
 *   **Trunk-Based Development:** Developers commit directly to the main branch, keeping it continuously deployable. Feature toggles are often used to manage incomplete features.
+
+## Git Hooks
+
+**Theory:** Git hooks are scripts that run automatically at certain points in the Git workflow, such as before a commit or after a merge. They allow you to automate tasks like code linting, testing, or enforcing commit message standards.
+
+**Common Hooks:**
+- **pre-commit:** Runs before a commit is made. Useful for running tests or linters.
+- **commit-msg:** Checks the commit message format.
+- **post-commit:** Runs after a commit, e.g., for notifications.
+
+**Example:** Create a pre-commit hook to run tests.
+
+```bash
+#!/bin/sh
+# .git/hooks/pre-commit
+npm test
+```
+
+**Steps:**
+1. Navigate to `.git/hooks/` in your repository.
+2. Create or edit the hook file (e.g., `pre-commit`).
+3. Make it executable: `chmod +x pre-commit`.
+4. Add your script logic.
+
+## Git Submodules
+
+**Theory:** Git submodules allow you to include one Git repository inside another as a subdirectory. This is useful for managing dependencies or shared code across projects.
+
+**Use Cases:**
+- Including a library or shared component.
+- Managing monorepos with separate repositories.
+
+**Visual Workflow:**
+
+```
+Main Repo
+├── .gitmodules
+└── submodule/
+    └── .git (points to external repo)
+```
+
+**Steps:**
+```bash
+# Add a submodule
+git submodule add https://github.com/user/library.git path/to/submodule
+
+# Clone a repo with submodules
+git clone --recurse-submodules https://github.com/user/main-repo.git
+
+# Update submodules
+git submodule update --init --recursive
+```
+
+## Troubleshooting Common Git Issues
+
+### 1. **Merge Conflicts**
+- **Issue:** Conflicting changes in the same file.
+- **Solution:** Edit the conflicted file, remove conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`), then commit.
+
+### 2. **Detached HEAD State**
+- **Issue:** HEAD points to a commit instead of a branch.
+- **Solution:** Create a new branch: `git checkout -b new-branch`.
+
+### 3. **Untracked Files**
+- **Issue:** Files not staged for commit.
+- **Solution:** Add them: `git add .` or ignore with `.gitignore`.
+
+### 4. **Push Rejected**
+- **Issue:** Remote has newer changes.
+- **Solution:** Pull first: `git pull --rebase origin main`.
+
+### 5. **Lost Commits**
+- **Issue:** Accidental reset or rebase.
+- **Solution:** Use `git reflog` to find and restore commits.
+
+## Git Best Practices
+
+- **Commit Often:** Make small, frequent commits with clear messages.
+- **Use Branches:** Develop features in separate branches.
+- **Write Good Commit Messages:** Use imperative mood, e.g., "Add feature" not "Added feature".
+- **Review Code:** Use pull requests for collaboration.
+- **Keep History Clean:** Use rebase for linear history on feature branches.
+- **Backup Regularly:** Push to remotes often.
+- **Learn from Mistakes:** Use `git reflog` to recover from errors.
