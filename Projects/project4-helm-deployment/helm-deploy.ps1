@@ -156,6 +156,8 @@ function Deploy-K8s {
     }
 
     Write-Host "Helm release '$HelmReleaseName' deployed successfully."
+    Write-Host "Application is now accessible at: http://localhost:30080"
+    Write-Host "Note: Ensure your local Kubernetes cluster (e.g., Minikube, Docker Desktop) is running and 'localhost' resolves to the node IP."
 }
 
 # ---------------------------------------------------------------------------
@@ -191,7 +193,7 @@ function Main {
     
     switch ($Action) {
         'deploy' {
-            # Build-App is no longer needed as it's part of the multi-stage Docker build
+            Build-App # is no longer needed as it's part of the multi-stage Docker build
             Build-Image
             Deploy-K8s
         }

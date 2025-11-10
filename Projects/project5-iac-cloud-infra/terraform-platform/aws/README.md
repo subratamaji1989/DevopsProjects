@@ -330,3 +330,26 @@ This is the most privileged role, used to apply changes to your infrastructure. 
 --- 
 
 This README serves as a guide to understanding the structure and purpose of the Terraform Platform within the AWS infrastructure as code project.
+
+
+### Activate AWS Credentials for Local Development
+
+To work with the AWS CLI or SDKs locally, you need to set the `AWS_PROFILE` environment variable.
+
+**Windows (Command Prompt)**
+```cmd
+set AWS_PROFILE=dev-iac
+```
+> 📝 **Note:** This command sets the environment variable only for the current Command Prompt session.
+
+**Windows (PowerShell)**
+```powershell
+$env:AWS_PROFILE="dev-iac"
+```
+> 📝 **Note:** This command sets the environment variable only for the current PowerShell session.
+
+**Linux / macOS / WSL (Bash/Zsh)**
+```bash
+export AWS_PROFILE=dev-iac
+```
+> 📝 **Note:** This command sets the environment variable only for the current terminal session. Add it to your `~/.bashrc` or `~/.zshrc` file to make it permanent.

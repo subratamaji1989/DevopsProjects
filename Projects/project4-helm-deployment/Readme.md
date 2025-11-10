@@ -367,6 +367,28 @@ helm uninstall myapp -n prod
 
 ---
 
+## 🌐 Accessing the Deployed Application
+
+After successful deployment using the `helm-deploy.ps1` script, the Java web application will be accessible via a local browsable URL.
+
+### Local Access URL
+- **URL**: `http://localhost:30080`
+- **Service Type**: NodePort (exposed on port 30080)
+- **Namespace**: `ovr-ns` (default)
+
+### Steps to Access
+1. Run the deployment script: `.\helm-deploy.ps1 deploy`
+2. Wait for the deployment to complete (check with `kubectl get pods -n ovr-ns` to ensure pods are running).
+3. Open your web browser and navigate to: `http://localhost:30080`
+
+### Notes
+- This assumes a local Kubernetes cluster (e.g., Minikube, Kind, or Docker Desktop with Kubernetes enabled) where `localhost` resolves to the node IP.
+- If using Minikube, replace `localhost` with the output of `minikube ip`.
+- The application runs on port 8080 inside the container, exposed externally via NodePort 30080.
+- If the service type is changed (e.g., to LoadBalancer or Ingress), the access method will differ.
+
+---
+
 ## 💎 Conclusion
 
 This structured Helm workflow provides:
