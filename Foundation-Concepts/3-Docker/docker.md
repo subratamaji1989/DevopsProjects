@@ -14,10 +14,12 @@
 6. Docker Networking
 7. Dockerfiles
 8. Docker Compose
-9. Best Practices
-10. Advanced Usage & Debugging
-11. Security Tips
-12. Useful Commands Summary
+9. Docker Swarm
+10. Docker Buildx and Advanced Builds
+11. Best Practices
+12. Advanced Usage & Debugging
+13. Security Tips
+14. Useful Commands Summary
 
 ---
 
@@ -307,11 +309,104 @@ docker compose ps         # list services
 
 ---
 
-# 9. Best Practices
+# 9. Docker Swarm
+
+**Purpose**: Native Docker orchestration for clustering and scaling containers.
+
+**Initialize Swarm**
+
+```bash
+docker swarm init                    # on manager node
+docker swarm join-token worker       # get token for workers
+docker swarm join-token manager      # get token for managers
+```
+
+**Deploy services**
+
+```bash
+docker service create --name web -p 80:80 --replicas 3 nginx
+docker service ls
+docker service ps web                # see tasks
+docker service scale web=5           # scale to 5 replicas
+docker service update --image nginx:alpine web  # rolling update
+```
+
+**Manage Swarm**
+
+```bash
+docker node ls                       # list nodes
+docker service logs web              # service logs
+docker service rm web                # remove service
+docker swarm leave                   # leave swarm (force with --force)
+```
+
+**Secrets and configs**
+
+```bash
+echo "secret" | docker secret create mysecret -
+docker service create --secret mysecret webapp
+```
+
+**Stacks with Compose**
+
+```bash
+docker stack deploy -c docker-compose.yml mystack
+docker stack ls
+docker stack services mystack
+docker stack rm mystack
+```
+
+---
+
+# 10. Docker Buildx and Advanced Builds
+
+**Buildx**: Advanced builder for multi-platform, efficient builds.
+
+**Enable Buildx**
+
+```bash
+docker buildx create --use --name mybuilder  # create and use builder
+docker buildx ls                             # list builders
+```
+
+**Multi-platform builds**
+
+```bash
+docker buildx build --platform linux/amd64,linux/arm64 -t myapp:multi .
+# Push to registry
+docker buildx build --push --platform linux/amd64,linux/arm64 -t myrepo/myapp:multi .
+```
+
+**Build secrets**
+
+```bash
+# Pass secrets without baking into image
+docker buildx build --secret id=github_token,env=GITHUB_TOKEN -t myapp .
+# In Dockerfile: RUN --mount=type=secret,id=github_token,target=/run/secrets/github_token
+```
+
+**Advanced features**
+
+* **Bake**: Build multiple images from a single file.
+* **Cache**: Export/import build cache for faster rebuilds.
+* **Attestations**: Add SBOMs and provenance.
+
+**Docker Scout**: Vulnerability scanning.
+
+```bash
+docker scout cves myimage:latest     # scan for CVEs
+docker scout recommendations myimage # get recommendations
+docker scout compare myimage:v1 myimage:v2  # compare versions
+```
+
+---
+
+# 11. Best Practices
 
 **Images & builds**
 
-* Pin base image tags. Use minimal base images.- Use multi-stage builds to minimize final image size.
+* Pin base image tags. Use minimal base images.
+* Use multi-stage builds to minimize final image size.
 * Keep Dockerfiles readable and cache-friendly.
 * Use `.dockerignore`.
 
@@ -323,7 +418,8 @@ docker compose ps         # list services
 
 **CI/CD**
 
-* Rebuild only what's necessary; cache layers wisely.- Scan images for vulnerabilities during pipeline.
+* Rebuild only what's necessary; cache layers wisely.
+* Scan images for vulnerabilities during pipeline.
 
 **Configuration & secrets**
 
@@ -336,7 +432,7 @@ docker compose ps         # list services
 
 ---
 
-# 10. Advanced Usage & Debugging
+# 12. Advanced Usage & Debugging
 
 **Attach a shell to a running container**
 
@@ -378,7 +474,7 @@ Be careful: `-a` will remove images not referenced by any container.
 
 ---
 
-# 11. Security Tips
+# 13. Security Tips
 
 **Least privilege**
 
@@ -405,7 +501,7 @@ Be careful: `-a` will remove images not referenced by any container.
 
 ---
 
-# 12. Useful Commands Summary
+# 14. Useful Commands Summary
 
 **Images**
 
