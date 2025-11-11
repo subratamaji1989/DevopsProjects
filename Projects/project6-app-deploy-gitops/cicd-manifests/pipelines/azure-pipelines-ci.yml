@@ -1,0 +1,97 @@
+trigger:
+  branches:
+    include:
+    - main
+    - develop
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  SONAR_HOST_URL: 'https://your-sonarqube-server.com'
+  SONAR_TOKEN: $(SONAR_TOKEN)
+
+stages:
+- stage: Build
+  jobs:
+  - job: CI
+    steps:
+    - task: UseJavaVersion@1
+      inputs:
+        versionSpec: '17'
+        addToPath: true
+
+    - script: |
+        echo "Installing security tools..."
+        curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+        wget https://github.com/gitleaks/gitleaks/releases/download/v8.17.0/gitleaks_8.17.0_linux_x64.tar.gz -O /tmp/gitleaks.tar.gz && tar -xzf /tmp/gitleaks.tar.gz -C /usr/local/bin
+        wget https://github.com/jeremylong/DependencyCheck/releases/download/v8.4.0/dependency-check-8.4.0-release.zip -O /tmp/dc.zip && unzip /tmp/dc.zip -d /opt && ln -s /opt/dependency-check/bin/dependency-check.sh /usr/local/bin/dependency-check
+        curl -sSLo /usr/local/bin/kustomize https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.0.1/kustomize_v5.0.1_linux_amd64.tar.gz | tar xzf - -C /usr/local/bin
+        wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 && chmod +x /usr/local/bin/yq
+        chmod +x /usr/local/bin/*
+      displayName: 'Install Security Tools'
+
+    - script: |
+        echo "Loading pipeline variables..."
+        # Parse YAML variables from pipeline-vars.yml using yq
+        TARGET_ENV="dev"
+        APP_NAME=$(yq '.APP_NAME' pipeline-vars.yml)
+        ACR_REPO_URI=$(yq '.ACR_REPO_URI' pipeline-vars.yml)
+        MANIFEST_REPO_URL=$(yq '.MANIFEST_REPO_URL' pipeline-vars.yml)
+        APP_PORT=$(yq '.APP_PORT' pipeline-vars.yml)
+        HEALTH_CHECK_PATH=$(yq '.HEALTH_CHECK_PATH' pipeline-vars.yml)
+        SONAR_PROJECT_KEY=$(yq '.SONAR_PROJECT_KEY' pipeline-vars.yml)
+        COMMIT_HASH=$(Build.SourceVersion | cut -c 1-7)
+        IMAGE_TAG=${COMMIT_HASH:=latest}
+        echo "Loaded variables: APP_NAME=$APP_NAME, ACR_REPO_URI=$ACR_REPO_URI, APP_PORT=$APP_PORT"
+        echo "Logging in to Azure Container Registry..."
+        az acr login --name ovrakscicd
+        echo "Cloning app-manifests repository..."
+        git clone $MANIFEST_REPO_URL app-manifests
+        echo "Replacing placeholders in manifests..."
+        sed -i "s/{{APP_NAME}}/$APP_NAME/g" app-manifests/k8s/base/app/deployment.yaml app-manifests/k8s/base/app/service.yaml app-manifests/k8s/overlays/dev/kustomization.yaml
+        sed -i "s/{{APP_PORT}}/$APP_PORT/g" app-manifests/k8s/base/app/deployment.yaml app-manifests/k8s/base/app/service.yaml
+        sed -i "s/{{HEALTH_CHECK_PATH}}/$HEALTH_CHECK_PATH/g" app-manifests/k8s/base/app/deployment.yaml
+        sed -i "s/{{ACR_REPO_URI}}/$ACR_REPO_URI/g" app-manifests/k8s/overlays/dev/kustomization.yaml
+      displayName: 'Pre-build Setup'
+
+    - script: |
+        echo "Running SAST scans (SonarQube, Gitleaks, OWASP Dependency-Check)..."
+        sonar-scanner -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.sources=. -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN
+        gitleaks detect --verbose --redact --config .gitleaks.toml || exit 1
+        dependency-check --scan . --format JSON --out /tmp/dependency-check-report.json || exit 1
+        echo "Building the Java application and Docker image..."
+        mvn clean package
+        docker build -t $ACR_REPO_URI:$IMAGE_TAG -f app-manifests/Dockerfile .
+        echo "Running container scan (Trivy)..."
+        trivy image --exit-code 1 --no-progress --format json --output /tmp/trivy-report.json $ACR_REPO_URI:$IMAGE_TAG || exit 1
+        echo "Running DAST (ZAP baseline scan)..."
+        docker run --rm -v $(pwd):/zap/wrk/:rw owasp/zap2docker-stable zap-baseline.py -t http://localhost:$APP_PORT -r /zap/wrk/zap-report.html || exit 1
+      displayName: 'Build and Scan'
+
+    - script: |
+        echo "Pushing the Docker image to ACR..."
+        docker push $ACR_REPO_URI:$IMAGE_TAG
+        echo "Updating Kustomize image tag..."
+        cd app-manifests/k8s/overlays/dev
+        kustomize edit set image $ACR_REPO_URI:$IMAGE_TAG
+        echo "Committing and pushing manifest changes..."
+        git config user.name "Azure Pipelines"
+        git config user.email "azuredevops@example.com"
+        git add kustomization.yaml
+        git commit -m "Update image to $IMAGE_TAG [Security scans passed]"
+        git push
+      displayName: 'Publish and Update Manifests'
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathToPublish: '/tmp/trivy-report.json'
+        artifactName: 'TrivyReport'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathToPublish: '/tmp/dependency-check-report.json'
+        artifactName: 'DependencyCheckReport'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathToPublish: 'zap-report.html'
+        artifactName: 'ZAPReport'

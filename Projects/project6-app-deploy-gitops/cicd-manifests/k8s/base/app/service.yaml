@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{APP_NAME}}-service
+spec:
+  selector:
+    app: {{APP_NAME}}
+  ports:
+  - protocol: TCP
+    port: {{APP_PORT}}
+    targetPort: {{APP_PORT}}
+  type: ClusterIP  # Use ClusterIP for Ingress-based routing via Azure Application Gateway

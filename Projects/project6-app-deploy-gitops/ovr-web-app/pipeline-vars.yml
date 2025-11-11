@@ -1,0 +1,42 @@
+# --- Global Application & Build Configuration ---
+APP_NAME: "ovr-web-app"
+APP_TYPE: "java"
+JAVA_VERSION: "17"
+DOCKERFILE_PATH: "."
+APP_PORT: 8080
+HEALTH_CHECK_PATH: "/actuator/health"
+
+# --- Global Azure & Container Registry Configuration ---
+AZURE_REGION: "East US"
+ACR_REPO_URI: "ovrcontainerregistry.azurecr.io/ovr-web-app"
+
+# --- Global Security & GitOps Configuration ---
+SONAR_HOST_URL: "https://your-sonarqube-server.com"
+SONAR_PROJECT_KEY: "ovr-web-app"
+MANIFEST_REPO_URL: "https://dev.azure.com/your-org/your-project/_git/cicd-manifests"
+
+# --- Environment-Specific Configurations ---
+# The CI pipeline will select one of these blocks based on the Git branch or trigger.
+dev:
+  AKS_CLUSTER_NAME: "ovr-aks-cluster-dev"
+  K8S_NAMESPACE: "web-apps-dev"
+  JAVA_OPTS: "-Xmx512m -Xms256m"
+  TRIVY_SEVERITY: "HIGH,CRITICAL"
+  MANIFEST_REPO_BRANCH: "develop"
+  KUSTOMIZE_PATH: "k8s/overlays/dev"
+
+staging:
+  AKS_CLUSTER_NAME: "ovr-aks-cluster-staging"
+  K8S_NAMESPACE: "web-apps-staging"
+  JAVA_OPTS: "-Xmx1g -Xms512m"
+  TRIVY_SEVERITY: "HIGH,CRITICAL"
+  MANIFEST_REPO_BRANCH: "staging"
+  KUSTOMIZE_PATH: "k8s/overlays/staging"
+
+prod:
+  AKS_CLUSTER_NAME: "ovr-aks-cluster-prod"
+  K8S_NAMESPACE: "web-apps-prod"
+  JAVA_OPTS: "-Xmx2g -Xms1g"
+  TRIVY_SEVERITY: "CRITICAL"
+  MANIFEST_REPO_BRANCH: "main"
+  KUSTOMIZE_PATH: "k8s/overlays/prod"
