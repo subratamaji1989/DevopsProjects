@@ -2,7 +2,22 @@
 
 This guide provides the fundamental commands DevOps engineers and SRE use daily for monitoring, diagnostics, and system management, formatted for quick reference.
 
-## **1. System Health and Resource Monitoring**
+## Table of Contents
+- [1. System Health and Resource Monitoring](#1-system-health-and-resource-monitoring)
+- [2. Networking and Connectivity](#2-networking-and-connectivity)
+- [3. Text Processing and Log Inspection](#3-text-processing-and-log-inspection)
+- [4. Process and Service Management](#4-process-and-service-management)
+- [5. Containerization and Orchestration (Kubernetes/Docker)](#5-containerization-and-orchestration-kubernetesdocker)
+- [6. Security, File Management, and Package Control](#6-security-file-management-and-package-control)
+- [7. Version Control (Git)](#7-version-control-git)
+- [8. File System Navigation](#8-file-system-navigation)
+- [9. User Management](#9-user-management)
+- [10. Backup and Compression](#10-backup-and-compression)
+- [11. Scripting Basics](#11-scripting-basics)
+- [Troubleshooting Common Issues](#troubleshooting-common-issues)
+- [Best Practices](#best-practices)
+
+## 1. System Health and Resource Monitoring
 
 - **Check CPU and Memory usage in real-time.**
 ```bash
@@ -41,7 +56,7 @@ du -sh *
 uname -a
 ```
 
-## **2. Networking and Connectivity**
+## 2. Networking and Connectivity
 
 - **Test basic network connectivity and latency.**
 
@@ -86,7 +101,7 @@ ip addr show
 ip route show
 ```
 
-## **3. Text Processing and Log Inspection**
+## 3. Text Processing and Log Inspection
 - **Search log files for a specific error pattern.**
 
 ```bash
@@ -129,7 +144,7 @@ wc -l file.txt
 sort unsorted_list.txt
 ```
 
-## **4. Process and Service Management**
+## 4. Process and Service Management
 - **Get a snapshot of all running processes.**
 
 ```bash
@@ -163,13 +178,23 @@ nohup long_running_script.sh &
 pstree -p
 ```
 
+Process Tree Example:
+```
+init(1)─┬─systemd(1)─┬─sshd(1234)─┬─sshd(5678)───bash(9012)
+        │            │             └─sshd(3456)───bash(7890)
+        │            ├─nginx(2468)─┬─nginx(1357)
+        │            │             └─nginx(2469)
+        │            └─docker(1111)─┬─containerd(2222)
+        │                          └─dockerd(3333)
+```
+
 - **List all open files and the processes that opened them (powerful diagnostic).**
 
 ```bash
 lsof -i :8080  # Show processes listening on port 8080
 ```
 
-## **5. Containerization and Orchestration (Kubernetes/Docker)**
+## 5. Containerization and Orchestration (Kubernetes/Docker)
 
 - **List currently running Docker containers.**
 
@@ -207,7 +232,7 @@ kubectl logs -f my-app-pod-xyz
 kubectl exec -it my-app-pod-xyz -- bash
 ```
 
-## **6. Security, File Management, and Package Control**
+## 6. Security, File Management, and Package Control
 
 - **Execute a command with superuser privileges.**
 
@@ -249,7 +274,7 @@ sudo yum check-update
 sudo yum install package_name
 ```
 
-## **7. Version Control (Git)**
+## 7. Version Control (Git)
 
 - **Check the status of files in the working directory and staging area.**
 
@@ -284,3 +309,206 @@ git log --stat
 git branch -d feature/your-feature-name
 git push origin --delete feature/your-feature-name
 ```
+
+## 8. File System Navigation
+
+- **List directory contents (with details).**
+
+```bash
+ls -la
+```
+
+- **Change directory.**
+
+```bash
+cd /path/to/directory
+cd ..  # Go up one level
+cd ~   # Go to home directory
+```
+
+- **Print working directory.**
+
+```bash
+pwd
+```
+
+- **Create directories.**
+
+```bash
+mkdir new_directory
+mkdir -p parent/child/grandchild  # Create nested directories
+```
+
+- **Remove files and directories.**
+
+```bash
+rm file.txt
+rm -rf directory/  # Remove directory recursively
+```
+
+- **Copy files and directories.**
+
+```bash
+cp source.txt destination.txt
+cp -r source_dir/ destination_dir/
+```
+
+- **Move or rename files and directories.**
+
+```bash
+mv old_name.txt new_name.txt
+mv file.txt /new/path/
+```
+
+- **Find files by name.**
+
+```bash
+find /path -name "*.log"
+```
+
+## 9. User Management
+
+- **Display current user information.**
+
+```bash
+whoami
+id
+```
+
+- **Switch to another user.**
+
+```bash
+su - username
+sudo -u username command
+```
+
+- **Add a new user.**
+
+```bash
+sudo useradd newuser
+sudo passwd newuser
+```
+
+- **Delete a user.**
+
+```bash
+sudo userdel username
+```
+
+- **Change user password.**
+
+```bash
+passwd  # Change own password
+sudo passwd username  # Change another user's password
+```
+
+- **List all users.**
+
+```bash
+cat /etc/passwd
+```
+
+## 10. Backup and Compression
+
+- **Create a compressed tar archive.**
+
+```bash
+tar -czf archive.tar.gz /path/to/directory
+```
+
+- **Extract a tar archive.**
+
+```bash
+tar -xzf archive.tar.gz
+```
+
+- **Compress a file with gzip.**
+
+```bash
+gzip file.txt  # Creates file.txt.gz
+```
+
+- **Decompress a gzip file.**
+
+```bash
+gunzip file.txt.gz
+```
+
+- **Create a backup with rsync (incremental).**
+
+```bash
+rsync -av --delete /source/ /backup/
+```
+
+## 11. Scripting Basics
+
+- **Create a simple bash script.**
+
+```bash
+#!/bin/bash
+echo "Hello, World!"
+```
+
+- **Make script executable and run it.**
+
+```bash
+chmod +x script.sh
+./script.sh
+```
+
+- **Use variables in scripts.**
+
+```bash
+#!/bin/bash
+NAME="DevOps"
+echo "Hello, $NAME!"
+```
+
+- **Conditional statements.**
+
+```bash
+if [ "$VAR" == "value" ]; then
+    echo "Match"
+else
+    echo "No match"
+fi
+```
+
+- **Loops.**
+
+```bash
+for i in {1..5}; do
+    echo "Iteration $i"
+done
+```
+
+- **Check exit status.**
+
+```bash
+command
+if [ $? -eq 0 ]; then
+    echo "Success"
+else
+    echo "Failed"
+fi
+```
+
+## Troubleshooting Common Issues
+
+- **Permission denied:** Use `sudo` or check file permissions with `ls -l`.
+- **Command not found:** Ensure the package is installed or add to PATH.
+- **Disk full:** Check with `df -h` and `du -sh *` to find large files.
+- **Service not starting:** Check logs with `journalctl -u service_name`.
+- **Network issues:** Use `ping`, `traceroute`, or `ss -tuln` to diagnose.
+- **High CPU/Memory:** Monitor with `top` or `htop` and identify processes.
+
+## Best Practices
+
+- **Use absolute paths in scripts** to avoid dependency on current directory.
+- **Always check exit codes** in scripts for error handling.
+- **Use `sudo` sparingly** and understand what commands do.
+- **Backup before making changes** to critical files.
+- **Monitor logs regularly** for early issue detection.
+- **Automate repetitive tasks** with scripts.
+- **Keep systems updated** with package managers.
+- **Use version control** for configuration files and scripts.
