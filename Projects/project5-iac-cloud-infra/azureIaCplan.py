@@ -111,7 +111,7 @@ def main():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument("action", choices=["plan", "apply", "destroy"], help="Action to perform.")
-    parser.add_argument("--app", default="app-ovr-infra", help="Application name.")
+    parser.add_argument("--app", default="ovr-app-infra", help="Application name.")
     parser.add_argument("--cloud", default="azure", help="Cloud provider (aws or azure).")
     parser.add_argument("--env", default="dev", help="Target environment (e.g., dev, prod).")
 
