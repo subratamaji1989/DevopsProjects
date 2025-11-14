@@ -16,10 +16,15 @@
 8. Handlers & Notifications
 9. Templates (Jinja2)
 10. Roles & Reuse
-11. Ansible Vault (Secrets Management)
-12. Debugging & Troubleshooting
-13. Best Practices
-14. Useful Commands Summary
+11. Ansible Collections
+12. AWX/Tower Basics
+13. Advanced Modules
+14. Async and Performance
+15. Ansible Vault (Secrets Management)
+16. Debugging & Troubleshooting
+17. Best Practices
+18. References & Resources
+19. Useful Commands Summary
 
 ---
 
@@ -32,6 +37,14 @@
 
 **Core concepts**
 
+```
+Ansible Architecture:
++----------------+     +----------------+     +----------------+
+| Control Node   | --> | Managed Nodes  | --> | Infrastructure |
+| (Ansible CLI)  |     | (SSH/WinRM)    |     | (Servers, etc.) |
++----------------+     +----------------+     +----------------+
+```
+
 * Inventory: defines hosts and groups.
 * Module: reusable unit of work (e.g., copy file, install package).
 * Task: action executed on hosts.
@@ -41,8 +54,9 @@
 **Install**
 
 * macOS: `brew install ansible`
-* Linux: `apt-get install ansible` / `yum install ansible`
-* Pip: `pip install ansible`
+* Linux: `apt-get install ansible` / `yum install ansible` / `dnf install ansible`
+* Pip: `pip install ansible` (recommended for latest versions)
+* Docker: `docker run -it ansible/ansible:latest ansible --version`
 * Verify: `ansible --version`
 
 ---
@@ -166,6 +180,53 @@ ansible all -m user -a "name=testuser state=present"
         dest: /etc/web.conf
 ```
 
+**Practical example: Deploy a web app with database**
+
+```yaml
+- name: Deploy web app
+  hosts: web
+  become: yes
+  vars:
+    app_port: 8080
+  tasks:
+    - name: Install Java
+      apt:
+        name: openjdk-11-jdk
+        state: present
+    - name: Download app JAR
+      get_url:
+        url: https://example.com/app.jar
+        dest: /opt/app.jar
+    - name: Create systemd service
+      template:
+        src: app.service.j2
+        dest: /etc/systemd/system/app.service
+      notify: Restart app
+    - name: Start app
+      service:
+        name: app
+        state: started
+
+  handlers:
+    - name: Restart app
+      service:
+        name: app
+        state: restarted
+
+- name: Setup database
+  hosts: db
+  become: yes
+  tasks:
+    - name: Install MySQL
+      apt:
+        name: mysql-server
+        state: present
+    - name: Start MySQL
+      service:
+        name: mysql
+        state: started
+```
+
 ---
 
 # 6. Variables & Facts
@@ -203,11 +264,13 @@ ansible-playbook site.yml -e "app_port=9090"
 
 **Popular modules**
 
-* Package: `apt`, `yum`, `dnf`
-* Files: `copy`, `template`, `file`, `synchronize`
-* System: `user`, `group`, `service`
-* Cloud: `ec2`, `gcp_compute`, `azure_rm`
-* Utilities: `uri`, `get_url`, `unarchive`
+| Category | Modules | Description |
+|----------|---------|-------------|
+| Package | `apt`, `yum`, `dnf` | Install/remove packages |
+| Files | `copy`, `template`, `file`, `synchronize` | Manage files and directories |
+| System | `user`, `group`, `service` | User/group/service management |
+| Cloud | `ec2`, `gcp_compute`, `azure_rm` | Cloud resource provisioning |
+| Utilities | `uri`, `get_url`, `unarchive` | Network and archive operations |
 
 Example:
 
@@ -301,7 +364,115 @@ ansible-galaxy install geerlingguy.nginx
 
 ---
 
-# 11. Ansible Vault (Secrets Management)
+# 11. Ansible Collections
+
+**What are Collections?**
+
+* Bundled packages of Ansible content (modules, roles, plugins).
+* Introduced in Ansible 2.10 for better organization and distribution.
+* Allow FQCN (Fully Qualified Collection Name) for modules.
+
+**Install collections**
+
+```bash
+ansible-galaxy collection install community.general
+ansible-galaxy collection install amazon.aws
+```
+
+**Use FQCN**
+
+```yaml
+- name: Create EC2 instance
+  amazon.aws.ec2_instance:
+    name: my-instance
+    state: present
+```
+
+**List installed collections**
+
+```bash
+ansible-galaxy collection list
+```
+
+---
+
+# 12. AWX/Tower Basics
+
+**What is AWX/Tower?**
+
+* Web-based UI for Ansible (AWX is open-source, Tower is enterprise).
+* Provides job scheduling, inventory management, and role-based access.
+
+**Key features**
+
+* Job Templates: Predefined playbooks with parameters.
+* Inventories: Dynamic host management.
+* Credentials: Secure storage for SSH keys, passwords.
+* Workflows: Chain multiple job templates.
+
+**Basic usage**
+
+* Install AWX: Use Docker Compose or Kubernetes.
+* Create inventory, credentials, and job template.
+* Launch jobs via UI or API.
+
+---
+
+# 13. Advanced Modules
+
+**Cloud modules (expanded)**
+
+* AWS: `ec2`, `s3_bucket`, `rds_instance`
+* Azure: `azure_rm_virtualmachine`, `azure_rm_storageaccount`
+* GCP: `gcp_compute_instance`, `gcp_storage_bucket`
+
+Example: Create S3 bucket
+
+```yaml
+- name: Create S3 bucket
+  amazon.aws.s3_bucket:
+    name: my-bucket
+    state: present
+    region: us-east-1
+```
+
+**Networking modules**
+
+* `netconf_get`, `netconf_config` (for network devices)
+* `cli_command` (for CLI-based devices)
+
+**Windows modules**
+
+* `win_command`, `win_service`, `win_user`
+
+---
+
+# 14. Async and Performance
+
+**Async tasks**
+
+* Run long-running tasks asynchronously.
+
+```yaml
+- name: Run async task
+  command: sleep 30
+  async: 45
+  poll: 0
+```
+
+**Forks**
+
+* Control parallelism: `ansible-playbook site.yml -f 10`
+
+**Performance tuning**
+
+* Use `serial` for rolling updates.
+* Limit facts gathering with `gather_facts: false`.
+* Use `strategy: free` for parallel execution.
+
+---
+
+# 15. Ansible Vault (Secrets Management)
 
 **Encrypt file**
 
@@ -326,7 +497,7 @@ ansible-vault decrypt file.yml
 
 ---
 
-# 12. Debugging & Troubleshooting
+# 16. Debugging & Troubleshooting
 
 **Dry run**
 
@@ -353,22 +524,56 @@ ansible-playbook site.yml -vvv
 ansible-playbook site.yml -l web1
 ```
 
+**Common errors and fixes**
+
+* SSH connection failed: Check SSH keys, user permissions.
+* Module not found: Use FQCN or install collection.
+* Syntax error: Run `--syntax-check`.
+* Permission denied: Use `--become`.
+
 ---
 
-# 13. Best Practices
+# 17. Best Practices
 
 * Use roles for reusability and maintainability.
 * Group vars in `group_vars/` and `host_vars/`.
 * Use vault for sensitive data.
 * Keep playbooks idempotent.
 * Prefer modules over shell commands.
-* Test with Molecule or CI pipelines.
+* Test with Molecule or ansible-lint.
 * Structure inventories (dev/staging/prod).
 * Use tags for selective runs.
+* Implement security: Least privilege, audit logs.
+* Integrate with CI/CD: GitHub Actions, Jenkins.
+* Use collections for modern Ansible (2.10+).
 
 ---
 
-# 14. Useful Commands Summary
+# 18. References & Resources
+
+**Official Docs**
+
+* [Ansible Documentation](https://docs.ansible.com/)
+* [Ansible Galaxy](https://galaxy.ansible.com/)
+
+**Community**
+
+* [Ansible Forum](https://forum.ansible.com/)
+* [Reddit r/ansible](https://www.reddit.com/r/ansible/)
+
+**Learning Resources**
+
+* [Ansible Getting Started](https://docs.ansible.com/ansible/latest/getting_started/index.html)
+* [Sample Playbooks](https://github.com/ansible/ansible-examples)
+
+**Tools**
+
+* [Molecule](https://molecule.readthedocs.io/) for testing
+* [AWX](https://github.com/ansible/awx) open-source Tower
+
+---
+
+# 19. Useful Commands Summary
 
 **Inventory**
 
