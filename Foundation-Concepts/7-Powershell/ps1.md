@@ -14,12 +14,17 @@
 6. Objects & Pipelines
 7. Conditional Logic & Loops
 8. Functions & Scripts
-9. Modules & Packages
-10. Error Handling & Debugging
-11. PowerShell Remoting
-12. File System & Registry
-13. Security & Execution Policy
-14. Useful Commands Summary
+9. PowerShell Classes
+10. Modules & Packages
+11. Desired State Configuration (DSC)
+12. Error Handling & Debugging
+13. PowerShell Remoting
+14. File System & Registry
+15. Security & Execution Policy
+16. Advanced Scripting (Jobs & Events)
+17. Best Practices
+18. References & Resources
+19. Useful Commands Summary
 
 ---
 
@@ -30,6 +35,18 @@
 * Task automation and configuration management shell from Microsoft.
 * Built on .NET, supports object-oriented scripting.
 * Cross-platform (Windows, macOS, Linux).
+
+**PowerShell Architecture:**
+
+```
++----------------+     +----------------+     +----------------+
+| PowerShell     | --> | .NET Runtime   | --> | OS/API Layer   |
+| Engine         |     | (CoreCLR)      |     | (Win32/API)    |
++----------------+     +----------------+     +----------------+
+```
+
+* PowerShell Core (7+): Open-source, cross-platform.
+* Windows PowerShell (5.1): Windows-only, legacy.
 
 **Install**
 
@@ -75,12 +92,15 @@ Get-ChildItem C:\Users
 
 **Common aliases**
 
-* `ls`, `dir`, `gci` → `Get-ChildItem`
-* `cat`, `type` → `Get-Content`
-* `rm`, `del` → `Remove-Item`
-* `where` → `Where-Object`
-* `?` → `Where-Object`
-* `%` → `ForEach-Object`
+| Alias | Cmdlet | Description |
+|-------|--------|-------------|
+| `ls`, `dir`, `gci` | `Get-ChildItem` | List directory contents |
+| `cat`, `type` | `Get-Content` | Get file contents |
+| `rm`, `del` | `Remove-Item` | Delete files/directories |
+| `where`, `?` | `Where-Object` | Filter objects |
+| `%` | `ForEach-Object` | Iterate over objects |
+| `sort` | `Sort-Object` | Sort objects |
+| `select` | `Select-Object` | Select properties |
 
 ---
 
@@ -200,14 +220,42 @@ function Get-Square($num) {
 
 ```powershell
 param(
+  [Parameter(Mandatory=$true)]
   [string]$Name,
-  [int]$Age
+  [int]$Age = 25,
+  [ValidateSet("Dev","Prod","Test")]
+  [string]$Environment
 )
 ```
 
 ---
 
-# 9. Modules & Packages
+# 9. PowerShell Classes
+
+**Define class (PowerShell 5+)**
+
+```powershell
+class Person {
+    [string]$Name
+    [int]$Age
+
+    Person([string]$name, [int]$age) {
+        $this.Name = $name
+        $this.Age = $age
+    }
+
+    [string]Greet() {
+        return "Hello, I'm $($this.Name)"
+    }
+}
+
+$person = [Person]::new("Alice", 30)
+$person.Greet()
+```
+
+---
+
+# 10. Modules & Packages
 
 **Modules**
 
@@ -229,6 +277,17 @@ Update-Module Az
 ```powershell
 Find-Package
 Install-Package
+Get-Package
+Uninstall-Package
+```
+
+**PowerShellGet (PSGallery)**
+
+```powershell
+Find-Module -Name Az
+Install-Module -Name Az -Scope CurrentUser -Force
+Update-Module -Name Az
+Uninstall-Module -Name Az
 ```
 
 ---
@@ -258,6 +317,9 @@ trap [Exception] {
 
 ```powershell
 Set-PSDebug -Trace 1
+Set-PSBreakpoint -Script .\script.ps1 -Line 10
+Get-PSBreakpoint
+Remove-PSBreakpoint -Id 1
 ```
 
 ---
@@ -281,6 +343,13 @@ Invoke-Command -ComputerName server1 -ScriptBlock { Get-Process }
 ```powershell
 Enter-PSSession -ComputerName server1
 Exit-PSSession
+```
+
+**SSH-based remoting (PowerShell 6+)**
+
+```powershell
+Enter-PSSession -HostName user@server1 -SSHTransport
+Invoke-Command -HostName server1 -ScriptBlock { Get-Process } -SSHTransport
 ```
 
 ---
